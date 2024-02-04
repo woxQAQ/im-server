@@ -2,13 +2,28 @@ package gateway
 
 import (
 	"bytes"
+	"runtime"
+	"runtime/debug"
+	"strconv"
+	"sync"
+	"sync/atomic"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 )
 
+var (
+	ErrConnClosed                = errors.New("conn has closed")
+	ErrNotSupportMessageProtocol = errors.New("not support message protocol")
+	ErrClientClosed              = errors.New("client actively close the connection")
+	ErrPanic                     = errors.New("panic error")
+)
+
 type Client struct {
+	w sync.Mutex
 	// ClientId is the Identify of a Client
 	ClientId string
 
@@ -17,6 +32,12 @@ type Client struct {
 	// UserId identify a real user of the Im service
 	// ClientId, on the other hand, can be called "sessionId"
 	UserId string
+
+	// PlatformId is the system of the user
+	PlatformId string
+
+	// Context is the
+	Context *gin.Context
 
 	// Conn is the connection that Client connect to server
 	Conn *websocket.Conn
@@ -30,36 +51,114 @@ type Client struct {
 
 	// MessageChan is used to send message to the ClientManager
 	MessageChan chan []byte
+
+	closed atomic.Bool
+
+	CloseErr error
 }
 
-func NewClient(clientId string, conn *websocket.Conn, mgr *ClientMgr) *Client {
+func NewClient(clientId string, ctx *gin.Context, conn *websocket.Conn, mgr *ClientMgr) *Client {
 	return &Client{
 		ClientId:    clientId,
 		Conn:        conn,
 		Mgr:         mgr,
 		ConnectTime: uint64(time.Now().Unix()),
+		PlatformId:  ctx.Query("platformId"),
+		Context:     ctx,
 	}
 }
 
+// close used to close a client
+func (c *Client) close() {
+	if c.closed.Load() {
+		return
+	}
+	c.w.Lock()
+	defer c.w.Unlock()
+
+	c.closed.Store(true)
+	c.Conn.Close()
+	c.Mgr.unregisterChan <- c
+}
+
+// Read used to read message from peer of client
 func (c *Client) Read() {
 	defer func() {
-		c.Mgr.unregisterChan <- c
-		c.Conn.Close()
+		// program exit may due to panic, here capture panic
+		if r := recover(); r != nil {
+			c.CloseErr = ErrPanic
+			zap.S().Panic("conn have panic err:", r, string(debug.Stack()))
+		}
+		c.close()
 	}()
-	c.Conn.SetReadLimit(1024)
+
+	// make prepare for reading: setting maxMessageSize and deadline
+	c.Conn.SetReadLimit(maxMessageSize)
+	_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))
+
 	for {
-		_, data, err := c.Conn.ReadMessage()
+		messageType, data, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				zap.S().Infof("error: %v", err)
 			}
 			break
 		}
-		// remove '\n' to be space, and remove the message's edge's space
-		// is used to process multiline text to be one line
-		data = bytes.TrimSpace(bytes.Replace(data, []byte("\n"), []byte(" "), -1))
-		c.Mgr.receivedChan <- data
+		switch messageType {
+
+		// Json data, which we dont use
+		case websocket.TextMessage:
+			c.CloseErr = ErrNotSupportMessageProtocol
+			return
+
+		// protobuf data
+		case websocket.BinaryMessage:
+			_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))
+			// TODO: handler message: send the message to the transfer server
+
+			// remove '\n' to be space, and remove the message's edge's space
+			// is used to process multiline text to be one line
+			data = bytes.TrimSpace(bytes.Replace(data, []byte("\n"), []byte(" "), -1))
+			c.Mgr.receivedChan <- data
+
+		// PingMessage is used to validate a conn is alive or not
+		case websocket.PingMessage:
+			err = c.pingHandler()
+			zap.S().Error(err)
+
+		case websocket.CloseMessage:
+			c.CloseErr = ErrClientClosed
+			return
+		default:
+		}
 	}
+}
+
+func (c *Client) pingHandler() error {
+	_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))
+	return c.writePongMessage()
+}
+
+func (c *Client) writePongMessage() error {
+	if c.closed.Load() {
+		return nil
+	}
+
+	// make sure for secruty
+	c.w.Lock()
+	defer c.w.Unlock()
+
+	err := c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+	if err != nil {
+		pc, _, line, _ := runtime.Caller(2)
+		return errors.Wrap(err, "===>"+runtime.FuncForPC(pc).Name()+"()@"+strconv.Itoa(line)+": "+"")
+	}
+	return c.Conn.WriteMessage(websocket.PongMessage, nil)
+}
+
+func (c *Client) handleMessage(message []byte) error {
+	// TODO: handleMessage need to complete after server.go complete
+	return nil
 }
 
 func (c *Client) Write() {
