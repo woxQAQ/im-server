@@ -26,8 +26,13 @@ type ClientMgr struct {
 	// goroutinePool is a goroutine goroutinePool which is used to reuse goroutine
 	goroutinePool *ants.Pool
 
+	// onlineNum is the number of users of server
 	onlineNum atomic.Int64
 
+	// onlineUserConnNum is the number of connection of server
+	// NOTE: onlineNum different from onlineNum because
+	// one user may login several terminal at a same time
+	// different terminal should be handlerred as different clients
 	onlineUserConnNum atomic.Int64
 }
 
@@ -55,36 +60,27 @@ func (m *ClientMgr) Run() {
 			m.unregisterClient(client)
 
 		case message := <-m.receivedChan:
-			m.ClientMap.Range(func(connId, session any) bool {
-				client := session.(*Client)
-				select {
-				case client.MessageChan <- message:
-				default:
-					close(client.MessageChan)
-					m.ClientMap.Delete(connId)
-				}
-				return true
-			})
+			// TODO:
 		}
 	}
 }
 
 func (m *ClientMgr) RegisterClient(client *Client) {
-	// oldClients map中获取对应的client切片
-	// userOk 标识map中是否有clientID对应的切片
-	// clientOK 标识map中是否有 clientID 和 platformId 所对应的client切片
 	_, userOk, clientOk := m.ClientMap.Get(client.UserId, client.PlatformId)
-	// userMap中不存在client切片
+	// There is No key "UserId" in the ClientMap.
+	// It indicates that the user is login to the server for the first time
 	if !userOk {
 		m.ClientMap.Set(client.UserId, client)
 		m.onlineNum.Add(1)
 		m.onlineUserConnNum.Add(1)
 	} else {
 		if clientOk {
-			// 已有同平台的连接存在
+			// this terminal has been logined
+			// TODO: return a REPEAT ERROR
 			m.ClientMap.Set(client.ClientId, client)
 			m.onlineUserConnNum.Add(1)
 		} else {
+			// this terminal has not been logined
 			m.ClientMap.Set(client.UserId, client)
 			m.onlineUserConnNum.Add(1)
 		}

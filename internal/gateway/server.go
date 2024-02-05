@@ -64,8 +64,6 @@ type WsServer struct {
 
 	port int
 
-	clientsMap *Usermap
-
 	clientPool sync.Pool
 
 	handshakeTimeout time.Duration
@@ -94,7 +92,6 @@ func NewWsServer(opts ...option) (*WsServer, error) {
 				return new(Client)
 			},
 		},
-		clientsMap: newUserMap(),
 	}, nil
 }
 
@@ -116,6 +113,11 @@ func (ws *WsServer) Bootstrap() error {
 
 	signal.Notify(signs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-signs
+
+	wg.Go(func() error {
+		err := r.Run(":8080")
+		return err
+	})
 
 	return nil
 }
