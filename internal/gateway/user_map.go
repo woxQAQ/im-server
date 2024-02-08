@@ -22,7 +22,7 @@ func newUserMap() *Usermap {
 // the main return value is the []*Clients correspinding to the key and platformId
 // the bool values, first is which the clients exited
 // and second is which the clients correspinding to the platformId exited or not
-func (u *Usermap) Get(key string, platformId string) ([]*Client, bool, bool) {
+func (u *Usermap) Get(key string, platformId int) ([]*Client, bool, bool) {
 	allClients, userExited := u.m.Load(key)
 	if userExited {
 		var clients []*Client

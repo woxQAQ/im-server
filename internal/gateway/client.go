@@ -10,8 +10,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"github.com/woxQAQ/im-service/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -23,7 +25,7 @@ var (
 )
 
 type Client struct {
-	w sync.Mutex
+	w *sync.Mutex
 	// ClientId is the Identify of a Client
 	ClientId string
 
@@ -34,20 +36,7 @@ type Client struct {
 	UserId string
 
 	// PlatformId is the system of the user
-	PlatformId string
-
-	// Context is the
-	Context *gin.Context
-
-	// Conn is the connection that Client connect to server
-	Conn *websocket.Conn
-
-	ConnectTime uint64
-
-	// Mgr is the ClientManager that Client register to.
-	// the Mgr is used to manager the client,
-	// including sending and reading message...
-	Mgr *ClientMgr
+	PlatformId int
 
 	// MessageChan is used to send message to the ClientManager
 	MessageChan chan []byte
@@ -55,17 +44,58 @@ type Client struct {
 	closed atomic.Bool
 
 	CloseErr error
+
+	token string
+
+	ConnectTime uint64
+
+	// Context is the
+	Context *gin.Context
+
+	// Conn is the connection that Client connect to server
+	Conn *websocket.Conn
+
+	// Mgr is the ClientManager that Client register to.
+	// the Mgr is used to manager the client,
+	// including sending and reading message...
+	Mgr *ClientMgr
 }
 
-func NewClient(clientId string, ctx *gin.Context, conn *websocket.Conn, mgr *ClientMgr) *Client {
+func NewClient(
+	ctx *gin.Context,
+	conn *websocket.Conn,
+	mgr *ClientMgr,
+	token string,
+) *Client {
+	platformId, _ := strconv.Atoi(ctx.Query("platformId"))
 	return &Client{
-		ClientId:    clientId,
+		w:           new(sync.Mutex),
+		ClientId:    utils.Md5(ctx.RemoteIP() + "_" + strconv.Itoa(utils.Timestamp())),
 		Conn:        conn,
 		Mgr:         mgr,
 		ConnectTime: uint64(time.Now().Unix()),
-		PlatformId:  ctx.Query("platformId"),
+		PlatformId:  platformId,
 		Context:     ctx,
+		token:       token,
 	}
+}
+
+func (c *Client) resetClient(
+	conn *websocket.Conn,
+	mgr *ClientMgr,
+	userId, token string,
+	platformId int,
+) {
+	c.ClientId = uuid.New().String()
+	c.w = new(sync.Mutex)
+	c.PlatformId = platformId
+	c.token = token
+	c.UserId = userId
+	c.Conn = conn
+	c.Mgr = mgr
+	c.ConnectTime = uint64(time.Now().Unix())
+	c.CloseErr = nil
+	c.closed.Store(false)
 }
 
 // close used to close a client
@@ -154,11 +184,6 @@ func (c *Client) writePongMessage() error {
 		return errors.Wrap(err, "===>"+runtime.FuncForPC(pc).Name()+"()@"+strconv.Itoa(line)+": "+"")
 	}
 	return c.Conn.WriteMessage(websocket.PongMessage, nil)
-}
-
-func (c *Client) handleMessage(message []byte) error {
-	// TODO: handleMessage need to complete after server.go complete
-	return nil
 }
 
 func (c *Client) Write() {

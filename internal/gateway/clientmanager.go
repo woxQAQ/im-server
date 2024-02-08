@@ -1,7 +1,6 @@
 package gateway
 
 import (
-	"sync"
 	"sync/atomic"
 
 	"github.com/panjf2000/ants/v2"
@@ -37,7 +36,11 @@ type ClientMgr struct {
 }
 
 func newClientManager() *ClientMgr {
-	pool, err := ants.NewPool(1024, ants.WithPreAlloc(true), ants.WithNonblocking(true))
+	pool, err := ants.NewPool(
+		1024,
+		ants.WithPreAlloc(true),
+		ants.WithNonblocking(true),
+	)
 	if err != nil {
 		panic(err)
 	}
@@ -50,15 +53,15 @@ func newClientManager() *ClientMgr {
 	}
 }
 
-func (m *ClientMgr) Run() {
+func (m *ClientMgr) Run(done chan struct{}) error {
 	for {
 		select {
+		case <-done:
+			return nil
 		case client := <-m.registerChan:
 			m.RegisterClient(client)
-
 		case client := <-m.unregisterChan:
 			m.unregisterClient(client)
-
 		case message := <-m.receivedChan:
 			// TODO:
 		}
@@ -95,5 +98,9 @@ func (m *ClientMgr) RegisterClient(client *Client) {
 }
 
 func (m *ClientMgr) unregisterClient(client *Client) {
+	// TODO:
+}
+
+func (m *ClientMgr) handlerMessage(message []byte) {
 	// TODO:
 }
