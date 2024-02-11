@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"sync"
 	"sync/atomic"
 
 	"github.com/panjf2000/ants/v2"
@@ -24,6 +25,9 @@ type ClientMgr struct {
 
 	// goroutinePool is a goroutine goroutinePool which is used to reuse goroutine
 	goroutinePool *ants.Pool
+
+	// clientPool is used to reuse clients objects
+	clientPool sync.Pool
 
 	// onlineNum is the number of users of server
 	onlineNum atomic.Int64
@@ -50,6 +54,11 @@ func newClientManager() *ClientMgr {
 		registerChan:   make(chan *Client),
 		unregisterChan: make(chan *Client),
 		goroutinePool:  pool,
+		clientPool: sync.Pool{
+			New: func() any {
+				return new(Client)
+			},
+		},
 	}
 }
 
@@ -63,7 +72,7 @@ func (m *ClientMgr) Run(done chan struct{}) error {
 		case client := <-m.unregisterChan:
 			m.unregisterClient(client)
 		case message := <-m.receivedChan:
-			// TODO:
+			m.handlerMessage(message)
 		}
 	}
 }
@@ -98,9 +107,14 @@ func (m *ClientMgr) RegisterClient(client *Client) {
 }
 
 func (m *ClientMgr) unregisterClient(client *Client) {
-	// TODO:
+	defer m.clientPool.Put(client)
+	if isDel := m.ClientMap.Delete(client.ClientId, client.Context.RemoteIP()); isDel {
+		m.onlineNum.Add(-1)
+	}
+	m.onlineUserConnNum.Add(-1)
+	zap.S().Info("user offline", "close Error", client.CloseErr)
 }
 
 func (m *ClientMgr) handlerMessage(message []byte) {
-	// TODO:
+	// TODO: transfer msg to the transfer layer
 }

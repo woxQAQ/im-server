@@ -3,14 +3,19 @@ package gateway
 import "time"
 
 type configs struct {
+	// port is the port of websocket server
 	port int
 
+	// maxConnNum is the max websocket connection number
 	maxConnNum int64
 
+	// handshakeTimeout is the websocket handshake timeout
 	handshakeTimeout time.Duration
 
+	// maxMsgLength is the max message length
 	maxMsgLength int
 
+	// writeBufSize is the write buffer size
 	writeBufSize int
 }
 

@@ -41,10 +41,13 @@ type Client struct {
 	// MessageChan is used to send message to the ClientManager
 	MessageChan chan []byte
 
+	// closed used to mark the client is closed or not
 	closed atomic.Bool
 
+	// CloseErr is the error why the client close
 	CloseErr error
 
+	// token is the token of the user
 	token string
 
 	ConnectTime uint64
