@@ -1,4 +1,4 @@
-package MQ
+package kafka
 
 import (
 	"os"

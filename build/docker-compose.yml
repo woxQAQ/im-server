@@ -45,9 +45,8 @@ services:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_USER=${MYSQL_USERNAME}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-    privileged: true
     volumes:
-      - ${CODE_PATH_HOST}/mysql:/var/lib/mysql
+      - ${DATA_PATH_HOST}/mysql:/var/lib/mysql
     ports:
       - "${MYSQL_PORT}:3306"
     networks:

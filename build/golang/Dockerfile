@@ -2,7 +2,9 @@ FROM golang:1.21
 LABEL maintainer="ShirakamiYuki<woxqaq@gmail.com>"
 
 USER root
-RUN apt-get install -y --no-install-recommends unzip curl zip git vim screen
+RUN apt-get update && \
+        apt-get upgrade -y && \
+  apt-get install -y --no-install-recommends unzip curl zip git vim screen
 
 USER root
 RUN go install github.com/tal-tech/go-zero/tools/goctl@cli
