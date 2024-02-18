@@ -3,7 +3,7 @@ type (
 	// userId should not be a approach.
 	// In my system, username can be repeated
 	LoginRequest {
-		Method   uint8  `json:"method"` // mobile 0 and Email 1, more method can be supported further
+		//              Method   uint8  `json:"method"` // mobile 0 and Email 1, more method can be supported further
 		Mobile   string `json:"mobile"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -22,13 +22,13 @@ type (
 		// information to get almost any service in some place.
 		// this must cause invasion to persion privacy and restrict freedom of speech
 		// so in my project, mobile is not a necessary field to get our service
-		Gender   uint8  `json:"gender"`
+		Gender   uint32 `json:"gender"`
 		Password string `json:"password"`
 	}
 	RegisterResp {
 		Id     int64  `json:"id"`
 		Name   string `json:"name"`
-		Gender uint8  `json:"gender"`
+		Gender uint32 `json:"gender"`
 		Email  string `json:email"`
 	}
 	UserInfoResp {

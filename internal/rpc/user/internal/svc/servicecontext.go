@@ -3,6 +3,7 @@ package svc
 import (
 	"github.com/woxQAQ/im-service/internal/rpc/user/internal/config"
 	model "github.com/woxQAQ/im-service/pkg/common/sql/user"
+	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
 type ServiceContext struct {
@@ -12,7 +13,9 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	conn := sqlx.NewMysql(c.Mysql.DataSource)
 	return &ServiceContext{
-		Config: c,
+		Config:    c,
+		UserModel: model.NewUserbasicModel(conn, c.CacheRedis),
 	}
 }

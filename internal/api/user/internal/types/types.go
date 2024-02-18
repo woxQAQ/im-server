@@ -2,7 +2,6 @@
 package types
 
 type LoginRequest struct {
-	Method   uint8  `json:"method"` // mobile 0 and Email 1, more method can be supported further
 	Mobile   string `json:"mobile"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -18,14 +17,14 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Mobile   string `json:"mobile"`
-	Gender   uint8  `json:"gender"`
+	Gender   uint32 `json:"gender"`
 	Password string `json:"password"`
 }
 
 type RegisterResp struct {
 	Id     int64  `json:"id"`
 	Name   string `json:"name"`
-	Gender uint8  `json:"gender"`
+	Gender uint32 `json:"gender"`
 	Email  string `json:email"`
 }
 
