@@ -1,0 +1,13 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:9000
+Etcd:
+  Hosts:
+  - etcd:2379
+  Key: user.rpc
+Mysql:
+  DataSource: root:123456@tcp(mysql:3306)/imserver?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+CacheRedis:
+  - host: redis:6379
+    Type: node
+    Pass:
+salt: i9&SRbRs&r^PxnMZ@ETZxy4uj9&#E5@V
