@@ -2,6 +2,8 @@ package logic
 
 import (
 	"context"
+	"github.com/goccy/go-json"
+	"github.com/woxQAQ/im-service/internal/rpc/user/user"
 
 	"github.com/woxQAQ/im-service/internal/api/user/internal/svc"
 	"github.com/woxQAQ/im-service/internal/api/user/internal/types"
@@ -25,6 +27,15 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 
 func (l *UserInfoLogic) UserInfo() (resp *types.UserInfoResp, err error) {
 	// todo: add your logic here and delete this line
-
-	return
+	uid, _ := l.ctx.Value("uid").(json.Number).Int64()
+	res, err := l.svcCtx.UserRpc.UserInfo(l.ctx, &user.UserInfoRequest{Id: uid})
+	if err != nil {
+		return nil, err
+	}
+	return &types.UserInfoResp{
+		Id:     res.Id,
+		Name:   res.Name,
+		Gender: res.Gender.String(),
+		Email:  res.Email,
+	}, nil
 }

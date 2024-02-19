@@ -17,21 +17,18 @@ type RegisterRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Mobile   string `json:"mobile"`
-	Gender   uint32 `json:"gender"`
+	Gender   string `json:"gender"`
 	Password string `json:"password"`
 }
 
 type RegisterResp struct {
-	Id     int64  `json:"id"`
-	Name   string `json:"name"`
-	Gender uint32 `json:"gender"`
-	Email  string `json:email"`
+	Id int64 `json:"id"`
 }
 
 type UserInfoResp struct {
-	Id     string `json:"id"`
+	Id     int64  `json:"id"`
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 	Mobile string `json:"mobile"`
-	Gender int64  `json:"gender"`
+	Gender string `json:"gender"`
 }

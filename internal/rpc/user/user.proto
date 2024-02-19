@@ -2,6 +2,12 @@ syntax = "proto3";
 package user;
 option go_package = "/pb";
 
+enum Gender {
+    GENDER_UNKNOWN = 0;
+    GENDER_MALE = 1;
+    GENDER_FEMALE = 2;
+}
+
 message LoginRequest {
     string mobile = 1;
     string email = 2;
@@ -12,14 +18,15 @@ message LoginRequest {
 message LoginResp {
     int64 id = 1;
     string name = 2;
-    int6gender = 3;
+    Gender gender = 3;
     string email = 4;
+    string mobile = 5;
 }
 
 message RegisterRequest{
     string name = 1;
     string email = 2;
-    uint32 gender = 3;
+    Gender gender = 3;
     string mobile = 4;
     string password = 5;
 }
@@ -27,8 +34,9 @@ message RegisterRequest{
 message RegisterResp{
     int64 id = 1;
     string name = 2;
-    uint32 gender = 3;
+    Gender gender = 3;
     string email= 4;
+    string mobile = 5;
 }
 message UserInfoRequest{
     int64 id = 1;
@@ -37,7 +45,15 @@ message UserInfoRequest{
 message UserInfoResp{
     int64 id = 1;
     string name = 2;
-    int64 gender = 3;
+    Gender gender = 3;
+    string mobile = 4;
+    string email = 5;
+}
+
+message ModifyInfoRequest{
+    int64 id = 1;
+    string name = 2;
+    Gender gender = 3;
     string mobile = 4;
     string email = 5;
 }
@@ -46,4 +62,5 @@ service User {
     rpc Login(LoginRequest) returns (LoginResp);
     rpc Register(RegisterRequest) returns (RegisterResp);
     rpc UserInfo(UserInfoRequest) returns (UserInfoResp);
+    rpc ModifyInfo(ModifyInfoRequest) returns ();
 }

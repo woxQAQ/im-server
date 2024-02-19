@@ -26,8 +26,7 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 	}
 }
 
-func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginRequest, err error) {
-	// todo: add your logic here and delete this line
+func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResp, err error) {
 	login, err := l.svcCtx.UserRpc.Login(l.ctx, &user.LoginRequest{
 		Mobile:   req.Mobile,
 		Email:    req.Email,
@@ -39,6 +38,11 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginRequest, e
 	}
 
 	token, err := jwt.GetToken(l.svcCtx.Config.Auth.AccessSecret, time.Now().Unix(), l.svcCtx.Config.Auth.AccessExpire, login.Id)
-	if err
-	return
+	if err != nil {
+		return nil, err
+	}
+	return &types.LoginResp{
+		Token:    token,
+		ExpireAt: time.Now().Unix() + l.svcCtx.Config.Auth.AccessExpire,
+	}, nil
 }

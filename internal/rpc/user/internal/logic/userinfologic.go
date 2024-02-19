@@ -28,7 +28,6 @@ func NewUserInfoLogic(ctx context.Context, svcCtx *svc.ServiceContext) *UserInfo
 }
 
 func (l *UserInfoLogic) UserInfo(in *pb.UserInfoRequest) (*pb.UserInfoResp, error) {
-	// todo: add your logic here and delete this line
 	user, err := l.svcCtx.UserModel.FindOne(l.ctx, in.Id)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
@@ -39,7 +38,7 @@ func (l *UserInfoLogic) UserInfo(in *pb.UserInfoRequest) (*pb.UserInfoResp, erro
 	return &pb.UserInfoResp{
 		Id:     user.Id,
 		Name:   user.Name,
-		Gender: user.Gender,
+		Gender: pb.Gender(pb.Gender_value[user.Gender]),
 		Email:  user.Email,
 		Mobile: user.MobilePhone,
 	}, nil

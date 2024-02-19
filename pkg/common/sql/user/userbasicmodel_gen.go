@@ -45,7 +45,7 @@ type (
 	Userbasic struct {
 		Id          int64     `db:"id"`
 		Name        string    `db:"name"`
-		Gender      int64     `db:"gender"`
+		Gender      string    `db:"gender"`
 		MobilePhone string    `db:"mobile_phone"`
 		Email       string    `db:"email"`
 		Password    string    `db:"password"`

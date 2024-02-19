@@ -39,7 +39,7 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.RegisterResp, erro
 	if errors.Is(err, model.ErrNotFound) {
 		newUser := model.Userbasic{
 			Name:        in.Name,
-			Gender:      in.Gender,
+			Gender:      in.Gender.String(),
 			MobilePhone: in.Mobile,
 			Email:       in.Email,
 			Password:    crypt.PasswordEncrypt(in.Password, l.svcCtx.Config.Salt),
@@ -53,10 +53,11 @@ func (l *RegisterLogic) Register(in *pb.RegisterRequest) (*pb.RegisterResp, erro
 		if err != nil {
 			return nil, status.Error(500, err.Error())
 		}
+
 		return &user.RegisterResp{
 			Id:     newUser.Id,
 			Name:   newUser.Name,
-			Gender: newUser.Gender,
+			Gender: in.Gender,
 			Email:  newUser.Email,
 		}, nil
 	}

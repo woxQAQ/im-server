@@ -22,27 +22,35 @@ type (
 		// information to get almost any service in some place.
 		// this must cause invasion to persion privacy and restrict freedom of speech
 		// so in my project, mobile is not a necessary field to get our service
-		Gender   uint32 `json:"gender"`
+		Gender   string `json:"gender"`
 		Password string `json:"password"`
 	}
 	RegisterResp {
-		Id     int64  `json:"id"`
-		Name   string `json:"name"`
-		Gender uint32 `json:"gender"`
-		Email  string `json:email"`
+		Id int64 `json:"id"`
 	}
 	UserInfoResp {
-		Id     string `json:"id"`
+		Id     int64  `json:"id"`
 		Name   string `json:"name"`
 		Email  string `json:"email"`
-		mobile string `json:"mobile"`
-		Gender int64  `json:"gender"`
+		Mobile string `json:"mobile"`
+		Gender string `json:"gender"`
 	}
+	ModifyRequest{
+		Id int64 `json:"id"`
+		Name string `json:"name"`
+		Email string `json:"email"`
+		Mobile string `json:"mobile"`
+		Gender string `json:"gender"`
+	}
+)
+
+@server(
+	prefix: /v1
 )
 
 service User {
 	@handler Login
-	post /api/user/login (LoginRequest) returns (LoginRequest)
+	post /api/user/login (LoginRequest) returns (LoginResp)
 
 	@handler Register
 	post /api/user/register (RegisterRequest) returns (RegisterResp)
@@ -55,5 +63,8 @@ service User {
 service User {
 	@handler UserInfo
 	post /api/user/userinfo returns (UserInfoResp)
+
+	@handler ModifyInfo
+	post /api/user/modifyinfo(ModifyRequest) returns()
 }
 

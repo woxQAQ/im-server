@@ -53,8 +53,6 @@ func loginRequestIsValid(in *pb.LoginRequest) (bool, string) {
 }
 
 func (l *LoginLogic) Login(in *pb.LoginRequest) (*pb.LoginResp, error) {
-	// todo: add your logic here and delete this line
-
 	// we will use phone OR email to login, so the LoginRequest will just flitter phone OR email
 	// a request with phone and email will be rejected
 	ok, method := loginRequestIsValid(in)
