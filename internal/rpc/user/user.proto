@@ -57,10 +57,13 @@ message ModifyInfoRequest{
     string mobile = 4;
     string email = 5;
 }
+message ModifyInfoResp{
+    bool ok = 1;
+}
 
 service User {
     rpc Login(LoginRequest) returns (LoginResp);
     rpc Register(RegisterRequest) returns (RegisterResp);
     rpc UserInfo(UserInfoRequest) returns (UserInfoResp);
-    rpc ModifyInfo(ModifyInfoRequest) returns ();
+    rpc ModifyInfo(ModifyInfoRequest) returns (ModifyInfoResp);
 }

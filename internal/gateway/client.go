@@ -55,6 +55,8 @@ type Client struct {
 	// Context is the
 	Context *gin.Context
 
+	RemoteIp string
+
 	// Conn is the connection that Client connect to server
 	Conn *websocket.Conn
 
@@ -78,6 +80,7 @@ func NewClient(
 		Mgr:         mgr,
 		ConnectTime: uint64(time.Now().Unix()),
 		PlatformId:  platformId,
+		RemoteIp:    ctx.RemoteIP(),
 		Context:     ctx,
 		token:       token,
 	}
@@ -133,8 +136,10 @@ func (c *Client) Read() {
 		messageType, data, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				zap.S().Infof("error: %v", err)
+				zap.S().Info("error due to peers close normal: ", err)
+				break
 			}
+			zap.S().Error("Unexpected close error:", err)
 			break
 		}
 		switch messageType {

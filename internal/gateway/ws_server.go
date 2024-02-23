@@ -2,6 +2,9 @@ package gateway
 
 import (
 	"context"
+	"fmt"
+	"go.uber.org/zap"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -35,10 +38,26 @@ type WsServer struct {
 }
 
 // NewWsServer gets a new websocket server
-func NewWsServer(opts ...option) (*WsServer, error) {
+func NewWsServer(opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
+	}
+	if config.port == 0 {
+		// use default port
+		config.port = 8080
+	}
+	if config.maxConnNum == 0 {
+		config.maxConnNum = 1024
+	}
+	if config.writeBufSize == 0 {
+		config.writeBufSize = 1024
+	}
+	if config.handshakeTimeout == 0 {
+		config.handshakeTimeout = 10 * time.Second
+	}
+	if config.maxMsgLength == 0 {
+		config.maxMsgLength = maxMessageSize
 	}
 	return &WsServer{
 		port:           config.port,
@@ -54,6 +73,14 @@ func NewWsServer(opts ...option) (*WsServer, error) {
 	}, nil
 }
 
+func ReplaceLogger() {
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal("replace logger failed", err.Error())
+	}
+	zap.ReplaceGlobals(logger)
+}
+
 func (ws *WsServer) Bootstrap() error {
 	var (
 		wg errgroup.Group
@@ -61,9 +88,10 @@ func (ws *WsServer) Bootstrap() error {
 		signs = make(chan os.Signal, 1)
 		done  = make(chan struct{}, 1)
 	)
-	gin.SetMode(gin.DebugMode)
-	r := gin.New()
-	r.Use(gin.Recovery(), CorsHandler())
+	//gin.SetMode(gin.DebugMode)
+	r := gin.Default()
+	ReplaceLogger()
+	r.Use(CorsHandler())
 	ws.registerRouter(r)
 
 	srv := &http.Server{
@@ -84,9 +112,9 @@ func (ws *WsServer) Bootstrap() error {
 	signal.Notify(signs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-signs
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		fmt.Println("Shutdown...")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-
 		_ = srv.Shutdown(ctx)
 		_ = wg.Wait()
 		close(done)

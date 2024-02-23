@@ -19,34 +19,34 @@ type configs struct {
 	writeBufSize int
 }
 
-func withPort(port int) option {
+func WithPort(port int) Option {
 	return func(opt *configs) {
 		opt.port = port
 	}
 }
 
-func withMaxConnNum(maxConnNum int64) option {
+func WithMaxConnNum(maxConnNum int64) Option {
 	return func(opt *configs) {
 		opt.maxConnNum = maxConnNum
 	}
 }
 
-func withHandshakeTimeout(handshakeTimeout time.Duration) option {
+func WithHandshakeTimeout(handshakeTimeout time.Duration) Option {
 	return func(opt *configs) {
 		opt.handshakeTimeout = handshakeTimeout
 	}
 }
 
-func withMaxMessageLength(maxMsgLength int) option {
+func WithMaxMessageLength(maxMsgLength int) Option {
 	return func(opt *configs) {
 		opt.maxMsgLength = maxMsgLength
 	}
 }
 
-func withWriteBufSize(writeBufSize int) option {
+func WithWriteBufSize(writeBufSize int) Option {
 	return func(opt *configs) {
 		opt.writeBufSize = writeBufSize
 	}
 }
 
-type option func(opt *configs)
+type Option func(opt *configs)

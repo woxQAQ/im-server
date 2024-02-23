@@ -14,15 +14,9 @@ func (ws *WsServer) registerRouter(r *gin.Engine) {
 }
 
 func wsHandler(ctx *gin.Context, ws *WsServer) {
-	client := ws.clientPool.Get().(*Client)
+	client := ws.clientManager.clientPool.Get().(*Client)
 	if ws.clientManager.onlineUserConnNum.Load() >= ws.wsMaxConnNum {
 		ctx.AbortWithError(http.StatusBadRequest, ErrConnOverMaxNumLimit)
-		return
-	}
-
-	isResp, exited := ctx.GetQuery("isResp")
-	if !exited {
-		ctx.AbortWithError(http.StatusBadRequest, ErrArgumentErr)
 		return
 	}
 
@@ -53,5 +47,6 @@ func wsHandler(ctx *gin.Context, ws *WsServer) {
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, ErrWebsockerUpgrade)
 	}
+	ws.clientManager.registerChan <- client
 	ws.clientManager.goroutinePool.Submit(client.Read)
 }

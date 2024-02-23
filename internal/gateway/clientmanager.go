@@ -10,7 +10,7 @@ import (
 
 type ClientMgr struct {
 	// ClientMap stores the Client register to the manager
-	ClientMap Usermap
+	ClientMap *UserMap
 
 	// registerChan receive clients which going to
 	// register to this manager
@@ -49,7 +49,7 @@ func newClientManager() *ClientMgr {
 		panic(err)
 	}
 	return &ClientMgr{
-		ClientMap:      *newUserMap(),
+		ClientMap:      newUserMap(),
 		receivedChan:   make(chan []byte, 1024),
 		registerChan:   make(chan *Client),
 		unregisterChan: make(chan *Client),
@@ -99,20 +99,20 @@ func (m *ClientMgr) RegisterClient(client *Client) {
 	}
 
 	zap.S().Info("user: ", client.UserId,
-		"arrived\nonline user number",
+		" arrived\nonline user number: ",
 		m.onlineNum.Load(),
-		"online user conn number: ",
+		"\nonline user conn number: ",
 		m.onlineUserConnNum.Load(),
 	)
 }
 
 func (m *ClientMgr) unregisterClient(client *Client) {
 	defer m.clientPool.Put(client)
-	if isDel := m.ClientMap.Delete(client.ClientId, client.Context.RemoteIP()); isDel {
+	if isDel := m.ClientMap.Delete(client.ClientId, client.Conn.RemoteAddr().String()); isDel {
 		m.onlineNum.Add(-1)
 	}
 	m.onlineUserConnNum.Add(-1)
-	zap.S().Info("user offline", "close Error", client.CloseErr)
+	zap.S().Info("user offline! ", "close Error:", client.CloseErr)
 }
 
 func (m *ClientMgr) handlerMessage(message []byte) {

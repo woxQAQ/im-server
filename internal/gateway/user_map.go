@@ -7,23 +7,23 @@ import (
 	"go.uber.org/zap"
 )
 
-// Usermap is to store a goroutine-safe key-value bind
+// UserMap is to store a goroutine-safe key-value bind
 // bind structure like [ClientId,[]*Clients]
-type Usermap struct {
+type UserMap struct {
 	m sync.Map
 }
 
 // newUserMap create a new UserMap
-func newUserMap() *Usermap {
-	return &Usermap{}
+func newUserMap() *UserMap {
+	return &UserMap{}
 }
 
 // Get fetch k-v pair, with clients with clientId and platformId
 // the main return value is the []*Clients correspinding to the key and platformId
 // the bool values, first is which the clients exited
 // and second is which the clients correspinding to the platformId exited or not
-func (u *Usermap) Get(key string, platformId int) ([]*Client, bool, bool) {
-	allClients, userExited := u.m.Load(key)
+func (u *UserMap) Get(userId string, platformId int) ([]*Client, bool, bool) {
+	allClients, userExited := u.m.Load(userId)
 	if userExited {
 		var clients []*Client
 		for _, client := range allClients.([]*Client) {
@@ -39,32 +39,32 @@ func (u *Usermap) Get(key string, platformId int) ([]*Client, bool, bool) {
 	return nil, userExited, false
 }
 
-// Set store client into Usermap
+// Set store client into UserMap
 // it may insert to a exited slice or create a new k-v pair
 // NOTE: when shoule Set to be called? only when a client
 // wants to be registered to server
-func (u *Usermap) Set(key string, v *Client) {
-	allClients, userExited := u.m.Load(key)
+func (u *UserMap) Set(userId string, client *Client) {
+	allClients, userExited := u.m.Load(userId)
 	if userExited {
-		zap.S().Debug(context.Background(), "user exited", "userid", key, "client", v)
+		zap.S().Debug(context.Background(), "user exited", "userid", userId, "client", client)
 		oldClients := allClients.([]*Client)
-		oldClients = append(oldClients, v)
-		u.m.Store(key, oldClients)
+		oldClients = append(oldClients, client)
+		u.m.Store(userId, oldClients)
 	} else {
-		zap.S().Debug(context.Background(), "user not exited", "userid", key, "client", v)
+		zap.S().Debug(context.Background(), " user not exited, ", "userid: ", userId, " client ", client)
 		var clients []*Client
-		clients = append(clients, v)
-		u.m.Store(key, clients)
+		clients = append(clients, client)
+		u.m.Store(userId, clients)
 	}
 }
 
-func (u *Usermap) Delete(key string, remoteAddr string) bool {
+func (u *UserMap) Delete(key string, remoteAddr string) bool {
 	allClients, userExited := u.m.Load(key)
 	if userExited {
 		oldClients := allClients.([]*Client)
 		var newClients []*Client
 		for _, client := range oldClients {
-			if client.Conn.RemoteAddr().String() != remoteAddr {
+			if client.Context.RemoteIP() != remoteAddr {
 				newClients = append(newClients, client)
 			}
 		}
@@ -79,11 +79,11 @@ func (u *Usermap) Delete(key string, remoteAddr string) bool {
 	return userExited
 }
 
-func (u *Usermap) deleteAll(key string) {
+func (u *UserMap) deleteAll(key string) {
 	u.m.Delete(key)
 }
 
-func (u *Usermap) GetAll(key string) ([]*Client, bool) {
+func (u *UserMap) GetAll(key string) ([]*Client, bool) {
 	allClients, ok := u.m.Load(key)
 	if ok {
 		return allClients.([]*Client), ok
