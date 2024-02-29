@@ -3,10 +3,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/config"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/server"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/svc"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/config"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/server"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/svc"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

@@ -2,7 +2,7 @@ package logic
 
 import (
 	"context"
-	"github.com/woxQAQ/im-service/internal/rpc/user/user"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/user"
 	"github.com/woxQAQ/im-service/pkg/common/jwt"
 	"time"
 

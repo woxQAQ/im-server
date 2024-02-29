@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/logic"
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/svc"
-	"github.com/woxQAQ/im-service/internal/rpc/user/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/logic"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/svc"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
 )
 
 type UserServer struct {

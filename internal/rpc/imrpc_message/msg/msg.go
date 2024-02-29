@@ -5,7 +5,7 @@ package msg
 
 import (
 	"context"
-	pb2 "github.com/woxQAQ/im-service/internal/rpc/msg/pb"
+	pb2 "github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

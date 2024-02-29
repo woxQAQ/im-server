@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/config"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/config"
 )
 
 type ServiceContext struct {

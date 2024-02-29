@@ -5,9 +5,9 @@ package server
 
 import (
 	"context"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/logic"
-	"github.com/woxQAQ/im-service/internal/rpc/msg/internal/svc"
-	pb2 "github.com/woxQAQ/im-service/internal/rpc/msg/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/logic"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/svc"
+	pb2 "github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
 )
 
 type MsgServer struct {

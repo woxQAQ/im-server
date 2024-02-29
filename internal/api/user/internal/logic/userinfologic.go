@@ -3,7 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/goccy/go-json"
-	"github.com/woxQAQ/im-service/internal/rpc/user/user"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/user"
 
 	"github.com/woxQAQ/im-service/internal/api/user/internal/svc"
 	"github.com/woxQAQ/im-service/internal/api/user/internal/types"

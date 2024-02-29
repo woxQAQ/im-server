@@ -2,7 +2,7 @@ package svc
 
 import (
 	"github.com/woxQAQ/im-service/internal/api/user/internal/config"
-	"github.com/woxQAQ/im-service/internal/rpc/user/user"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/user"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 

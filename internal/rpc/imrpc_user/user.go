@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/config"
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/server"
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/svc"
-	"github.com/woxQAQ/im-service/internal/rpc/user/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/config"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/server"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/svc"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"

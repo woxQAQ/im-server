@@ -1,7 +1,7 @@
 package convert
 
 import (
-	"github.com/woxQAQ/im-service/internal/rpc/user/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
 	"github.com/woxQAQ/im-service/pkg/common/sql/user"
 )
 

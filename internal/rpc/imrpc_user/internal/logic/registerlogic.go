@@ -3,14 +3,14 @@ package logic
 import (
 	"context"
 	"errors"
-	"github.com/woxQAQ/im-service/internal/rpc/user/user"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/user"
 	"github.com/woxQAQ/im-service/pkg/common/crypt"
 	model "github.com/woxQAQ/im-service/pkg/common/sql/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/woxQAQ/im-service/internal/rpc/user/internal/svc"
-	"github.com/woxQAQ/im-service/internal/rpc/user/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/svc"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
