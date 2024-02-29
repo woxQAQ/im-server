@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 	"log"
 	"net/http"
@@ -35,6 +36,10 @@ type WsServer struct {
 
 	// wsMaxMsgLength limits the max length of message
 	wsMaxMsgLength int
+
+	*validator.Validate
+	Encoder
+	ServiceHandler
 }
 
 // NewWsServer gets a new websocket server
@@ -59,16 +64,22 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	if config.maxMsgLength == 0 {
 		config.maxMsgLength = maxMessageSize
 	}
+	validate := validator.New()
 	return &WsServer{
 		port:           config.port,
 		wsMaxConnNum:   config.maxConnNum,
 		wsMaxMsgLength: config.maxMsgLength,
 		clientManager:  newClientManager(),
-
+		Validate:       validate,
+		Encoder:        newGobEncoder(),
+		ServiceHandler: newHandler(validate),
 		upgrader: &websocket.Upgrader{
 			HandshakeTimeout:  config.handshakeTimeout,
 			WriteBufferSize:   config.writeBufSize,
 			EnableCompression: true,
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
 		},
 	}, nil
 }

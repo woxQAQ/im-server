@@ -1,0 +1,40 @@
+syntax = "proto3";
+package msg;
+
+option go_package = "/pb";
+enum messageType {
+    MESSAGE_TYPE_TEXT = 0;
+    MESSAGE_TYPE_IMAGE = 1;
+    MESSAGE_TYPE_FILE = 2;
+    MESSAGE_TYPE_VIDEO = 3;
+    MESSAGE_TYPE_AUDIO = 4;
+    //    MESSAGE_TYPE_LOCATION = 5;
+}
+
+message MsgData {
+    string sender_id = 1;
+    string receiver_id = 2;
+    bytes content = 3;
+    int64 send_time = 4;
+    messageType type = 5;
+    repeated string mentioned_user_id = 6;
+    string attachment_info = 7;
+    map<string, string> options = 8;
+}
+
+message SendMessageReq{
+    string token = 1;
+    string operation_id = 2;
+    MsgData data = 3;
+}
+
+message SendMessageResp{
+    int32 code = 1;
+    string msg = 2;
+    string server_msg_id = 3;
+    string client_msg_id = 4;
+    string send_time = 5;
+}
+service Msg {
+    rpc SendMsg(SendMessageReq) returns (SendMessageResp) {}
+}

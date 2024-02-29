@@ -1,0 +1,5 @@
+MsgRpc:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    key: msg.rpc

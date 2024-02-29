@@ -71,8 +71,6 @@ func (m *ClientMgr) Run(done chan struct{}) error {
 			m.RegisterClient(client)
 		case client := <-m.unregisterChan:
 			m.unregisterClient(client)
-		case message := <-m.receivedChan:
-			m.handlerMessage(message)
 		}
 	}
 }
@@ -113,8 +111,4 @@ func (m *ClientMgr) unregisterClient(client *Client) {
 	}
 	m.onlineUserConnNum.Add(-1)
 	zap.S().Info("user offline! ", "close Error:", client.CloseErr)
-}
-
-func (m *ClientMgr) handlerMessage(message []byte) {
-	// TODO: transfer msg to the transfer layer
 }

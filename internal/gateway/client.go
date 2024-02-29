@@ -2,7 +2,7 @@ package gateway
 
 import (
 	"bytes"
-	"runtime"
+	"encoding/json"
 	"runtime/debug"
 	"strconv"
 	"sync"
@@ -64,6 +64,8 @@ type Client struct {
 	// the Mgr is used to manager the client,
 	// including sending and reading message...
 	Mgr *ClientMgr
+
+	Server *WsServer
 }
 
 func NewClient(
@@ -71,6 +73,7 @@ func NewClient(
 	conn *websocket.Conn,
 	mgr *ClientMgr,
 	token string,
+	server *WsServer,
 ) *Client {
 	platformId, _ := strconv.Atoi(ctx.Query("platformId"))
 	return &Client{
@@ -78,6 +81,7 @@ func NewClient(
 		ClientId:    utils.Md5(ctx.RemoteIP() + "_" + strconv.Itoa(utils.Timestamp())),
 		Conn:        conn,
 		Mgr:         mgr,
+		Server:      server,
 		ConnectTime: uint64(time.Now().Unix()),
 		PlatformId:  platformId,
 		RemoteIp:    ctx.RemoteIP(),
@@ -114,7 +118,7 @@ func (c *Client) close() {
 
 	c.closed.Store(true)
 	c.Conn.Close()
-	c.Mgr.unregisterChan <- c
+	c.Server.clientManager.unregisterChan <- c
 }
 
 // Read used to read message from peer of client
@@ -157,8 +161,10 @@ func (c *Client) Read() {
 			// remove '\n' to be space, and remove the message's edge's space
 			// is used to process multiline text to be one line
 			data = bytes.TrimSpace(bytes.Replace(data, []byte("\n"), []byte(" "), -1))
-			c.Mgr.receivedChan <- data
-
+			err := c.handlerRequest(data)
+			if err != nil {
+				zap.S().Error(err)
+			}
 		// PingMessage is used to validate a conn is alive or not
 		case websocket.PingMessage:
 			err = c.pingHandler()
@@ -172,6 +178,21 @@ func (c *Client) Read() {
 	}
 }
 
+func (c *Client) handlerRequest(Request []byte) error {
+	// TODO: handle message
+	var req = getReq()
+	defer freeReq(req)
+
+	err := json.Unmarshal(Request, req)
+	if err != nil {
+		return err
+	}
+	if req.SenderID != c.UserId {
+		return ErrSenderIdNotMatch
+	}
+
+	return nil
+}
 func (c *Client) pingHandler() error {
 	_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))
 	return c.writePongMessage()
@@ -182,14 +203,13 @@ func (c *Client) writePongMessage() error {
 		return nil
 	}
 
-	// make sure for secruty
+	// make sure for security
 	c.w.Lock()
 	defer c.w.Unlock()
 
 	err := c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
 	if err != nil {
-		pc, _, line, _ := runtime.Caller(2)
-		return errors.Wrap(err, "===>"+runtime.FuncForPC(pc).Name()+"()@"+strconv.Itoa(line)+": "+"")
+		return err
 	}
 	return c.Conn.WriteMessage(websocket.PongMessage, nil)
 }
