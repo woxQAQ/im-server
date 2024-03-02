@@ -5,14 +5,15 @@ package server
 
 import (
 	"context"
+
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/logic"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/svc"
-	pb2 "github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
 )
 
 type MsgServer struct {
 	svcCtx *svc.ServiceContext
-	pb2.UnimplementedMsgServer
+	pb.UnimplementedMsgServer
 }
 
 func NewMsgServer(svcCtx *svc.ServiceContext) *MsgServer {
@@ -21,7 +22,7 @@ func NewMsgServer(svcCtx *svc.ServiceContext) *MsgServer {
 	}
 }
 
-func (s *MsgServer) SendMsg(ctx context.Context, in *pb2.SendMessageReq) (*pb2.SendMessageResp, error) {
+func (s *MsgServer) SendMsg(ctx context.Context, in *pb.SendMessageReq) (*pb.SendMessageResp, error) {
 	l := logic.NewSendMsgLogic(ctx, s.svcCtx)
 	return l.SendMsg(in)
 }

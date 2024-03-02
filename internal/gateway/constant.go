@@ -15,4 +15,6 @@ var (
 	ErrWebsockerUpgrade    = errors.New("WebsocketUpgrade")
 	ErrArgumentErr         = errors.New("ArgumentError")
 	ErrSenderIdNotMatch    = errors.New("SenderId not match the userId it comes from")
+	ErrGroupIdNotFound     = errors.New("GroupId is not in the request")
+	ErrRecvIdNotFound      = errors.New("ReceiverId is not in the request")
 )

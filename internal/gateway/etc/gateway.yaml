@@ -4,3 +4,4 @@ MsgRpc:
     Hosts:
       - etcd:2379
     Key: msg.rpc
+CacheRedis:

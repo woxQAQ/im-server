@@ -12,28 +12,28 @@ enum messageType {
 }
 
 message MsgData {
-    string sender_id = 1;
-    string receiver_id = 2;
-    bytes content = 3;
-    int64 send_time = 4;
-    messageType type = 5;
-    repeated string mentioned_user_id = 6;
-    string attachment_info = 7;
-    map<string, string> options = 8;
+    string content = 1;
 }
 
-message SendMessageReq{
-    string token = 1;
-    string operation_id = 2;
-    MsgData data = 3;
-}
-
-message SendMessageResp{
-    int32 code = 1;
-    string msg = 2;
+message RespData{
     string server_msg_id = 3;
     string client_msg_id = 4;
     string send_time = 5;
+}
+
+message SendMessageReq{
+    string sender_id = 1;
+    string receiver_id = 2;
+    string group_id = 4;
+    MsgData content =5;
+    messageType content_type = 6;
+}
+
+message SendMessageResp{
+    int32 err_code = 1;
+    string err_msg= 2;
+    string err_del = 3;
+    RespData data = 4;
 }
 service Msg {
     rpc SendMsg(SendMessageReq) returns (SendMessageResp) {}

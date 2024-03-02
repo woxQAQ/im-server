@@ -5,16 +5,18 @@ package msg
 
 import (
 	"context"
-	pb2 "github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
+
+	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )
 
 type (
-	MsgData         = pb2.MsgData
-	SendMessageReq  = pb2.SendMessageReq
-	SendMessageResp = pb2.SendMessageResp
+	MsgData         = pb.MsgData
+	RespData        = pb.RespData
+	SendMessageReq  = pb.SendMessageReq
+	SendMessageResp = pb.SendMessageResp
 
 	Msg interface {
 		SendMsg(ctx context.Context, in *SendMessageReq, opts ...grpc.CallOption) (*SendMessageResp, error)
@@ -32,6 +34,6 @@ func NewMsg(cli zrpc.Client) Msg {
 }
 
 func (m *defaultMsg) SendMsg(ctx context.Context, in *SendMessageReq, opts ...grpc.CallOption) (*SendMessageResp, error) {
-	client := pb2.NewMsgClient(m.cli.Conn())
+	client := pb.NewMsgClient(m.cli.Conn())
 	return client.SendMsg(ctx, in, opts...)
 }

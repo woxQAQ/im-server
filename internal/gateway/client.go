@@ -27,6 +27,7 @@ var (
 
 const (
 	ServiceSingleChat = iota
+	ServiceGroupChat
 )
 
 type Client struct {
@@ -192,15 +193,12 @@ func (c *Client) handlerRequest(Request []byte) error {
 	if err != nil {
 		return err
 	}
-	if req.SenderID != c.UserId {
+	if req.SenderId != c.UserId {
 		return ErrSenderIdNotMatch
 	}
 
-	switch req.ServiceId {
-	case ServiceSingleChat:
-		ctx := context.WithValue(context.Background(), "serviceId", ServiceSingleChat)
-		_, err = c.Server.RpcRouterHandler.SendMessage(ctx, req)
-	}
+	ctx := context.WithValue(context.Background(), "serviceId", req.SessionType)
+	_, err = c.Server.RpcRouterHandler.SendMessage(ctx, req)
 
 	return err
 }
@@ -239,16 +237,19 @@ func (c *Client) Write() {
 				c.Conn.WriteMessage(websocket.CloseMessage, nil)
 				return
 			}
+
 			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
+
 			w.Write(message)
 			n := len(c.MessageChan)
 			for i := 0; i < n; i++ {
 				w.Write([]byte("\n"))
 				w.Write(<-c.MessageChan)
 			}
+
 			if err := w.Close(); err != nil {
 				return
 			}

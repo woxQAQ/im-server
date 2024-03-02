@@ -162,3 +162,34 @@ services:
     networks:
       - backend
     restart: always
+  rocketmq-nameserver:
+    build:
+      context: rocket
+    command: ["sh", "mqnamesrv"]
+    ports:
+      - 9876:9876
+    networks:
+      - backend
+  rocketmq-broker:
+    build:
+      context: rocket
+    ports:
+      - 10911:10911
+      - 10909:10909
+    volumes:
+      - ./rocket/broker.conf:/etc/rocketmq/broker.conf
+    depends_on:
+    - rocketmq-nameserver
+    command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf", "-n", "192.168.31.43:9876", "autoCreateTopicEnable=true"]
+    networks:
+      - backend
+  rocketmq-console:
+    image: apacherocketmq/rocketmq-dashboard
+    environment:
+      - JAVA_OPTS:"-Drocketmq.namesrv.addr=localhost:9876"
+    ports:
+      - 8099:8080
+    depends_on:
+      - rocketmq-nameserver
+    networks:
+      - backend
