@@ -1,0 +1,47 @@
+syntax = "v1"
+
+info (
+	title:   "消息网关api"
+	author:  "shirakamiyuki"
+	date:    "2024.03.02"
+	version: "v1"
+)
+
+type (
+	MsgData {
+		MsgId   int64  `json:"msgId"`
+		content string `json:"content"`
+	}
+	SendRequest {
+		SenderId       string  `json:"senderId"`
+		ReceiverId     string  `json:"receiverId"`
+		SenderPlatform int     `json:"senderPlatform"`
+		GroupId        int     `json:"groupId"`
+		Content        MsgData `json:"content"`
+		ContentType    int     `json:"contentType"`
+		SessionType    int     `json:"sessionType"`
+		SendTime       int     `json:"sendTime"`
+	}
+	ResponseData {
+		ClientMsgId string `json:"clientMsgId"`
+		ServerMsgId string `json:"serverMsgId"`
+		sendTime    string `json:"sendTime"`
+	}
+	SendResponse {
+		ErrCode int          `json:"errCode"`
+		ErrMsg  string       `json:"errMsg"`
+		ErrDlt  string       `json:"errDlt"`
+		Data    ResponseData `json:"data"`
+	}
+)
+
+@server (
+	prefix: /v1
+	jwt:    Auth
+)
+service send {
+	@doc "发送消息"
+	@handler SendMsg
+	post /api/ws/send_msg (SendRequest) returns (SendResponse)
+}
+

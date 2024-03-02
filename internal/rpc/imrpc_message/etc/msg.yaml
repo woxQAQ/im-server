@@ -1,12 +1,12 @@
 Name: msg.rpc
-ListenOn: 0.0.0.0:8080
+ListenOn: 0.0.0.0:9001
 Etcd:
   Hosts:
   - etcd:2379
   Key: msg.rpc
-Mysql:
-  DataSource: root:123456@tcp(mysql:3306)/imserver?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
-Redis:
+#Mysql:
+#  DataSource: root:123456@tcp(mysql:3306)/imserver?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+CacheRedis:
   - host: redis:6379
     Type: node
     Pass:

@@ -1,6 +1,7 @@
 package gateway
 
 import (
+	"github.com/woxQAQ/im-service/pkg/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,5 +24,15 @@ func CorsHandler() gin.HandlerFunc {
 			return
 		}
 		ctx.Next()
+	}
+}
+
+func domainIntercept() gin.HandlerFunc {
+	localIp, _ := utils.GetLocalAddr()
+	return func(ctx *gin.Context) {
+		if ctx.Request.Host == "localhost" || ctx.Request.Host == "127.0.0.1" || ctx.Request.Host == localIp.String() {
+			token := ctx.GetHeader("Authentication")
+
+		}
 	}
 }

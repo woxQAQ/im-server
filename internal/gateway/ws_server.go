@@ -39,11 +39,11 @@ type WsServer struct {
 
 	*validator.Validate
 	Encoder
-	ServiceHandler
+	RpcRouterHandler
 }
 
 // NewWsServer gets a new websocket server
-func NewWsServer(opts ...Option) (*WsServer, error) {
+func NewWsServer(configFile string, opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
@@ -66,13 +66,13 @@ func NewWsServer(opts ...Option) (*WsServer, error) {
 	}
 	validate := validator.New()
 	return &WsServer{
-		port:           config.port,
-		wsMaxConnNum:   config.maxConnNum,
-		wsMaxMsgLength: config.maxMsgLength,
-		clientManager:  newClientManager(),
-		Validate:       validate,
-		Encoder:        newGobEncoder(),
-		ServiceHandler: newHandler(validate),
+		port:             config.port,
+		wsMaxConnNum:     config.maxConnNum,
+		wsMaxMsgLength:   config.maxMsgLength,
+		clientManager:    newClientManager(),
+		Validate:         validate,
+		Encoder:          newGobEncoder(),
+		RpcRouterHandler: newHandler(configFile, validate),
 		upgrader: &websocket.Upgrader{
 			HandshakeTimeout:  config.handshakeTimeout,
 			WriteBufferSize:   config.writeBufSize,

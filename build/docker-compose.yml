@@ -10,7 +10,8 @@ services:
       - TZ=${TZ}
     privileged: true
     volumes:
-      - ${CODE_PATH_HOST}:/usr/src/code
+      - ${CODE_PATH_HOST}:/go/src/code
+      - ${GO_PKG_HOST}:/go/pkg
     ports:
       - "8000:8000"
       - "8001:8001"

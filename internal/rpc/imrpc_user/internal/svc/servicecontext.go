@@ -2,7 +2,7 @@ package svc
 
 import (
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/internal/config"
-	model "github.com/woxQAQ/im-service/pkg/common/sql/user"
+	model "github.com/woxQAQ/im-service/pkg/common/model/user"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 

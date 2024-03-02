@@ -2,6 +2,7 @@ package gateway
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"runtime/debug"
 	"strconv"
@@ -22,6 +23,10 @@ var (
 	ErrNotSupportMessageProtocol = errors.New("not support message protocol")
 	ErrClientClosed              = errors.New("client actively close the connection")
 	ErrPanic                     = errors.New("panic error")
+)
+
+const (
+	ServiceSingleChat = iota
 )
 
 type Client struct {
@@ -191,7 +196,13 @@ func (c *Client) handlerRequest(Request []byte) error {
 		return ErrSenderIdNotMatch
 	}
 
-	return nil
+	switch req.ServiceId {
+	case ServiceSingleChat:
+		ctx := context.WithValue(context.Background(), "serviceId", ServiceSingleChat)
+		_, err = c.Server.RpcRouterHandler.SendMessage(ctx, req)
+	}
+
+	return err
 }
 func (c *Client) pingHandler() error {
 	_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))

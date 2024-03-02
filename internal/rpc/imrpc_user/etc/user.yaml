@@ -1,12 +1,14 @@
 Name: user.rpc
-ListenOn: 0.0.0.0:9000
+ListenOn: 0.0.0.0:9005
 Etcd:
   Hosts:
-  - etcd:2379
+  # 如果在golang容器内编译,则需要修改为etcd:2379
+  # 如果在实机内编译，则需要改为localhost:2379
+  - localhost:2379
   Key: user.rpc
 Mysql:
   DataSource: root:123456@tcp(mysql:3306)/imserver?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
-Redis:
+CacheRedis:
   - host: redis:6379
     Type: node
     Pass:

@@ -1,3 +1,3 @@
-FROM mysql:5.7
+FROM mysql:latest
 
 LABEL maintainer="ShirakamiYuki<woxqaq@gmail.com>"

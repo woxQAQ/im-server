@@ -1,10 +1,14 @@
 FROM golang:1.21
 LABEL maintainer="ShirakamiYuki<woxqaq@gmail.com>"
 
+ENV GOPROXY https://goproxy.cn,direct
+
+ADD sources.list /etc/apt/
+
 USER root
 RUN apt-get update && \
         apt-get upgrade -y && \
-  apt-get install -y --no-install-recommends unzip curl zip git vim screen
+        apt-get install -y --no-install-recommends unzip curl zip git vim screen
 
 USER root
 RUN go install github.com/tal-tech/go-zero/tools/goctl@cli
@@ -19,7 +23,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
 
 ENV PATH $GOPATH/bin:$PATH
 
-WORKDIR /usr/src/code
+WORKDIR /go/src/code
 
 EXPOSE 8000
 EXPOSE 8001
@@ -29,3 +33,6 @@ EXPOSE 9000
 EXPOSE 9001
 EXPOSE 9002
 EXPOSE 9003
+EXPOSE 10001
+EXPOSE 10002
+EXPOSE 10003

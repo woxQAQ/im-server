@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
 	"github.com/woxQAQ/im-service/pkg/common/crypt"
-	model "github.com/woxQAQ/im-service/pkg/common/sql/user"
+	model "github.com/woxQAQ/im-service/pkg/common/model/user"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 

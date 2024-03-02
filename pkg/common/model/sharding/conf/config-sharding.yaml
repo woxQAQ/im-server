@@ -1,0 +1,42 @@
+schemaName: sharding_db
+
+dataSources:
+  ds_0:
+    url: jdbc:mysql://localhost:3306/imserver
+    username: root
+    password: 123456
+#    connectionTimeoutMilliseconds: 30000
+#    idleTimeoutMilliseconds: 60000
+#    maxLifetimeMilliseconds: 1800000
+#    maxPoolSize: 50
+#    minPoolSize: 1
+
+
+rules:
+  - !SHARDING
+    tables:
+      t_user:
+        actualDataNodes: ds_0.userbasic_${(0..99).collect(){it.toString().padLeft(2,'0')}}
+        tableStrategy:
+          standard:
+            shardingColumn: id
+            shardingAlgorithmName: t_user_inline
+        keyGenerateStrategy:
+          column: id
+          keyGeneratorName: snowflake
+    bindingTables:
+      - t_user
+    defaultDatabaseStrategy:
+      standard:
+        shardingColumn: user_id
+        shardingAlgorithmName: database_inline
+    defaultTableStrategy:
+      none:
+    shardingAlgorithms:
+      t_user_inline:
+        type: INLINE
+        props:
+          algorithm-expression: t_user_${(id % 100).toString().padLeft(2,'0')}
+    keyGenerators:
+      snowflake:
+        type: SNOWFLAKE
