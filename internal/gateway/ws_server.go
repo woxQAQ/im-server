@@ -103,6 +103,7 @@ func (ws *WsServer) Bootstrap() error {
 	r := gin.Default()
 	ReplaceLogger()
 	r.Use(CorsHandler())
+	r.Use(jwtHandler())
 	ws.registerRouter(r)
 
 	srv := &http.Server{

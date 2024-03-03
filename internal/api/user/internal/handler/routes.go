@@ -23,10 +23,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: RegisterHandler(serverCtx),
 			},
 		},
+		rest.WithPrefix("/v1"),
 	)
 
 	server.AddRoutes(
 		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/user/modifyinfo",
+				Handler: ModifyInfoHandler(serverCtx),
+			},
 			{
 				Method:  http.MethodPost,
 				Path:    "/api/user/userinfo",

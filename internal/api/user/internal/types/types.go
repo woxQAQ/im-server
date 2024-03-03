@@ -2,6 +2,8 @@
 package types
 
 type LoginRequest struct {
+	Method   int    `json:"method"` // mobile 0 and Email 1, more method can be supported further
+	UserId   string `json:"userId"`
 	Mobile   string `json:"mobile"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
@@ -13,7 +15,16 @@ type LoginResp struct {
 	ExpireAt int64  `json:"expireAt"`
 }
 
+type ModifyRequest struct {
+	Id     int64  `json:"id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	Mobile string `json:"mobile"`
+	Gender string `json:"gender"`
+}
+
 type RegisterRequest struct {
+	Method   int    `json:"method"`
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Mobile   string `json:"mobile"`

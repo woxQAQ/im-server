@@ -1,11 +1,15 @@
 package gateway
 
 import (
-	"github.com/woxQAQ/im-service/pkg/utils"
+	"github.com/golang-jwt/jwt/v4"
+	jwtTools "github.com/woxQAQ/im-service/pkg/common/jwt"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+var secretkey = "bZ87g@fcW93W8Y!uuK^nSHPAhgJeWKUc"
 
 func CorsHandler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -27,12 +31,47 @@ func CorsHandler() gin.HandlerFunc {
 	}
 }
 
-func domainIntercept() gin.HandlerFunc {
-	localIp, _ := utils.GetLocalAddr()
-	return func(ctx *gin.Context) {
-		if ctx.Request.Host == "localhost" || ctx.Request.Host == "127.0.0.1" || ctx.Request.Host == localIp.String() {
-			token := ctx.GetHeader("Authentication")
-
+func jwtHandler() gin.HandlerFunc {
+	return func(context *gin.Context) {
+		tokenString := context.GetHeader("Authentication")
+		if tokenString == "" {
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"errCode": 13,
+				"errMsg":  "you have no Authentication field in your request header",
+			})
+			context.Abort()
+			return
 		}
+
+		parts := strings.Split(tokenString, ".")
+		if len(parts) != 3 {
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"errCode": 13,
+				"errMsg":  "your token format is error",
+			})
+			context.Abort()
+			return
+		}
+
+		claims := &jwtTools.ClaimsWithUserId{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(secretkey), nil
+		})
+		if err != nil {
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"errCode": 13,
+				"errMsg":  "your token is unavailable or some err occurs with your token" + err.Error(),
+			})
+			context.Abort()
+			return
+		}
+
+		if claim, ok := token.Claims.(*jwtTools.ClaimsWithUserId); ok && token.Valid {
+			return claim, nil
+		}
+
+		context.Set("Claims", claims)
+
+		context.Next()
 	}
 }

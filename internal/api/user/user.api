@@ -3,7 +3,8 @@ type (
 	// userId should not be a approach.
 	// In my system, username can be repeated
 	LoginRequest {
-		//              Method   uint8  `json:"method"` // mobile 0 and Email 1, more method can be supported further
+		Method   int    `json:"method"` // mobile 0 and Email 1, more method can be supported further
+		UserId   string `json:"userId"`
 		Mobile   string `json:"mobile"`
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -15,6 +16,7 @@ type (
 		ExpireAt int64  `json:"expireAt"`
 	}
 	RegisterRequest {
+		Method int    `json:"method"`
 		Name   string `json:"name"`
 		Email  string `json:"email"`
 		Mobile string `json:"mobile"`
@@ -35,19 +37,18 @@ type (
 		Mobile string `json:"mobile"`
 		Gender string `json:"gender"`
 	}
-	ModifyRequest{
-		Id int64 `json:"id"`
-		Name string `json:"name"`
-		Email string `json:"email"`
+	ModifyRequest {
+		Id     int64  `json:"id"`
+		Name   string `json:"name"`
+		Email  string `json:"email"`
 		Mobile string `json:"mobile"`
 		Gender string `json:"gender"`
 	}
 )
 
-@server(
+@server (
 	prefix: /v1
 )
-
 service User {
 	@handler Login
 	post /api/user/login (LoginRequest) returns (LoginResp)
@@ -65,6 +66,6 @@ service User {
 	post /api/user/userinfo returns (UserInfoResp)
 
 	@handler ModifyInfo
-	post /api/user/modifyinfo(ModifyRequest) returns()
+	post /api/user/modifyinfo (ModifyRequest)
 }
 

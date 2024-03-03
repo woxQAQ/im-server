@@ -36,11 +36,13 @@ func wsHandler(ctx *gin.Context, ws *WsServer) {
 		return
 	}
 
-	token, exited := ctx.GetQuery("token")
-	if !exited {
-		ctx.AbortWithError(http.StatusBadRequest, ErrArgumentErr)
-		return
-	}
+	token := ctx.GetHeader("Authentication")
+
+	//token, exited := ctx.GetQuery("token")
+	//if !exited {
+	//	ctx.AbortWithError(http.StatusBadRequest, ErrArgumentErr)
+	//	return
+	//}
 
 	conn, err := ws.upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
 	client.resetClient(conn, ws.clientManager, userId, token, platformId)
