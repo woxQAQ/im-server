@@ -200,8 +200,9 @@ services:
     command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf"]
     environment:
       - NAMESRV_ADDR=rmqnamesrv:9876
-      - MAX_HEAP_SIZE=512M
-      - HEAP_NEW_SIZE=256M
+      - JAVA_OPT_EXT=-server -Xms256m -Xmx256m -Xmn128m
+#      - MAX_HEAP_SIZE=512M
+#      - HEAP_NEW_SIZE=256M
     networks:
       - backend
     restart: always
