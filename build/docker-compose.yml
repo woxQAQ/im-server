@@ -6,6 +6,7 @@ services:
   golang:
     build:
       context: ./golang
+    container_name: golang
     environment:
       - TZ=${TZ}
     privileged: true
@@ -27,6 +28,7 @@ services:
       - backend
     restart: always
   etcd:
+    container_name: etcd
     build:
       context: ./etcd
     environment:
@@ -39,6 +41,7 @@ services:
       - backend
     restart: always
   mysql:
+    container_name: mysql
     build:
       context: ./mysql
     environment:
@@ -54,6 +57,7 @@ services:
       - backend
     restart: always
   redis:
+    container_name: redis
     build:
       context: ./redis
     environment:
@@ -66,41 +70,42 @@ services:
     networks:
       - backend
     restart: always
-  mysql-manage:
-    build:
-      context: ./mysql-manage
-    environment:
-      - TZ=${TZ}
-      - PMA_ARBITRARY=1
-      - MYSQL_USER=${MYSQL_MANAGE_USERNAME}
-      - MYSQL_PASSWORD=${MYSQL_MANAGE_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_MANAGE_ROOT_PASSWORD}
-      - PMA_HOST=${MYSQL_MANAGE_CONNECT_HOST}
-      - PMA_PORT=${MYSQL_MANAGE_CONNECT_PORT}
-    ports:
-      - "${MYSQL_MANAGE_PORT}:80"
-    depends_on:
-      - mysql
-    networks:
-      - backend
-    restart: always
-  redis-manage:
-    build:
-      context: ./redis-manage
-    environment:
-      - TZ=${TZ}
-      - ADMIN_USER=${REDIS_MANAGE_USERNAME}
-      - ADMIN_PASS=${REDIS_MANAGE_PASSWORD}
-      - REDIS_1_HOST=${REDIS_MANAGE_CONNECT_HOST}
-      - REDIS_1_PORT=${REDIS_MANAGE_CONNECT_PORT}
-    ports:
-      - "${REDIS_MANAGE_PORT}:80"
-    depends_on:
-      - redis
-    networks:
-      - backend
-    restart: always
-  etcd_manage:
+#  mysql-manage:
+#    build:
+#      context: ./mysql-manage
+#    environment:
+#      - TZ=${TZ}
+#      - PMA_ARBITRARY=1
+#      - MYSQL_USER=${MYSQL_MANAGE_USERNAME}
+#      - MYSQL_PASSWORD=${MYSQL_MANAGE_PASSWORD}
+#      - MYSQL_ROOT_PASSWORD=${MYSQL_MANAGE_ROOT_PASSWORD}
+#      - PMA_HOST=${MYSQL_MANAGE_CONNECT_HOST}
+#      - PMA_PORT=${MYSQL_MANAGE_CONNECT_PORT}
+#    ports:
+#      - "${MYSQL_MANAGE_PORT}:80"
+#    depends_on:
+#      - mysql
+#    networks:
+#      - backend
+#    restart: always
+#  redis-manage:
+#    build:
+#      context: ./redis-manage
+#    environment:
+#      - TZ=${TZ}
+#      - ADMIN_USER=${REDIS_MANAGE_USERNAME}
+#      - ADMIN_PASS=${REDIS_MANAGE_PASSWORD}
+#      - REDIS_1_HOST=${REDIS_MANAGE_CONNECT_HOST}
+#      - REDIS_1_PORT=${REDIS_MANAGE_CONNECT_PORT}
+#    ports:
+#      - "${REDIS_MANAGE_PORT}:80"
+#    depends_on:
+#      - redis
+#    networks:
+#      - backend
+#    restart: always
+  etcd_manager:
+    container_name: etcd_manager
     build:
       context: ./etcd-manage
     environment:
@@ -113,6 +118,7 @@ services:
       - backend
     restart: always
   prometheus:
+    container_name: prometheus
     build:
       context: ./prometheus
     environment:
@@ -126,6 +132,7 @@ services:
       - backend
     restart: always
   jaeger:
+    container_name: jaeger
     build:
       context: ./jaeger
     environment:
@@ -136,6 +143,7 @@ services:
       - backend
     restart: always
   grafana:
+    container_name: grafana
     build:
       context: ./grafana
     environment:
@@ -146,6 +154,7 @@ services:
       - backend
     restart: always
   dtm:
+    container_name: dtm
     build:
       context: ./dtm
     environment:
@@ -162,34 +171,49 @@ services:
     networks:
       - backend
     restart: always
+
   rocketmq-nameserver:
     build:
       context: rocket
     command: ["sh", "mqnamesrv"]
+    container_name: rmqnamesrv
+    environment:
+      - MAX_HEAP_SIZE=256M
+      - HEAP_NEWSIZE=128M
     ports:
-      - 9876:9876
+      - "9876:9876"
     networks:
       - backend
+    restart: always
+
   rocketmq-broker:
+    container_name: mqbroker
     build:
       context: rocket
     ports:
-      - 10911:10911
-      - 10909:10909
+      - "10911:10911"
+      - "10909:10909"
     volumes:
       - ./rocket/broker.conf:/etc/rocketmq/broker.conf
     depends_on:
-    - rocketmq-nameserver
-    command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf", "-n", "192.168.31.43:9876", "autoCreateTopicEnable=true"]
+      - rocketmq-nameserver
+    command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf"]
+    environment:
+      - NAMESRV_ADDR=rmqnamesrv:9876
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEW_SIZE=256M
     networks:
       - backend
+    restart: always
+
   rocketmq-console:
     image: apacherocketmq/rocketmq-dashboard
     environment:
-      - JAVA_OPTS:"-Drocketmq.namesrv.addr=localhost:9876"
+      - JAVA_OPTS = -Xmx256M -Xms256M -Xmn128M -Drocketmq.namesrv.addr=rmqnamesrv:9876 -Dcom.rockermq.sendMessageWithVIPChannel=false
     ports:
-      - 8099:8080
+      - "8099:8080"
     depends_on:
       - rocketmq-nameserver
     networks:
       - backend
+    restart: always
