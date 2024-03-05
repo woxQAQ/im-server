@@ -31,6 +31,7 @@ func CorsHandler() gin.HandlerFunc {
 	}
 }
 
+
 func jwtHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenString := context.GetHeader("Authentication")
@@ -46,6 +47,7 @@ func jwtHandler() gin.HandlerFunc {
 		parts := strings.Split(tokenString, ".")
 		if len(parts) != 3 {
 			context.JSON(http.StatusUnauthorized, gin.H{
+				//todo errcode define
 				"errCode": 13,
 				"errMsg":  "your token format is error",
 			})
@@ -53,21 +55,27 @@ func jwtHandler() gin.HandlerFunc {
 			return
 		}
 
-		claims := &jwtTools.ClaimsWithUserId{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(secretkey), nil
-		})
-		if err != nil {
-			context.JSON(http.StatusUnauthorized, gin.H{
-				"errCode": 13,
-				"errMsg":  "your token is unavailable or some err occurs with your token" + err.Error(),
-			})
-			context.Abort()
-			return
+		j := jwtTools.Jwt{
+			SignedKeys: []byte(secretkey),
 		}
 
-		if claim, ok := token.Claims.(*jwtTools.ClaimsWithUserId); ok && token.Valid {
-			return claim, nil
+		claims, err := j.ParseToken(tokenString)
+		
+		if err != nil {
+			if err == jwt.ErrTokenExpired {
+				context.JSON(http.StatusUnauthorized, gin.H{
+					"errCode": 13,
+					"errMsg": "your token has been expired",
+				})
+				context.Abort()
+				return
+			}
+			context.JSON(http.StatusUnauthorized, gin.H{
+				"errCode": 13,
+				"errMsg": err.Error(),
+			})
+			context.Abort()
+			return 
 		}
 
 		context.Set("Claims", claims)

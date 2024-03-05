@@ -17,6 +17,22 @@ type configs struct {
 
 	// writeBufSize is the write buffer size
 	writeBufSize int
+
+	rmqNameSrv string
+
+	rmqTopic string
+}
+
+func WithTopic(topic string) Option {
+	return func(opt *configs) {
+		opt.rmqTopic = topic
+	}
+}
+
+func withRmqNamesrv(rmqNameSrv string) Option{
+	return func(opt *configs) {
+		opt.rmqNameSrv = rmqNameSrv
+	}
 }
 
 func WithPort(port int) Option {

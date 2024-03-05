@@ -13,17 +13,20 @@ import (
 )
 
 type (
-	LoginRequest    = pb.LoginRequest
-	LoginResp       = pb.LoginResp
-	RegisterRequest = pb.RegisterRequest
-	RegisterResp    = pb.RegisterResp
-	UserInfoRequest = pb.UserInfoRequest
-	UserInfoResp    = pb.UserInfoResp
+	LoginRequest      = pb.LoginRequest
+	LoginResp         = pb.LoginResp
+	ModifyInfoRequest = pb.ModifyInfoRequest
+	ModifyInfoResp    = pb.ModifyInfoResp
+	RegisterRequest   = pb.RegisterRequest
+	RegisterResp      = pb.RegisterResp
+	UserInfoRequest   = pb.UserInfoRequest
+	UserInfoResp      = pb.UserInfoResp
 
 	User interface {
 		Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResp, error)
 		Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResp, error)
 		UserInfo(ctx context.Context, in *UserInfoRequest, opts ...grpc.CallOption) (*UserInfoResp, error)
+		ModifyInfo(ctx context.Context, in *ModifyInfoRequest, opts ...grpc.CallOption) (*ModifyInfoResp, error)
 	}
 
 	defaultUser struct {
@@ -50,4 +53,9 @@ func (m *defaultUser) Register(ctx context.Context, in *RegisterRequest, opts ..
 func (m *defaultUser) UserInfo(ctx context.Context, in *UserInfoRequest, opts ...grpc.CallOption) (*UserInfoResp, error) {
 	client := pb.NewUserClient(m.cli.Conn())
 	return client.UserInfo(ctx, in, opts...)
+}
+
+func (m *defaultUser) ModifyInfo(ctx context.Context, in *ModifyInfoRequest, opts ...grpc.CallOption) (*ModifyInfoResp, error) {
+	client := pb.NewUserClient(m.cli.Conn())
+	return client.ModifyInfo(ctx, in, opts...)
 }

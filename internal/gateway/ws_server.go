@@ -3,8 +3,6 @@ package gateway
 import (
 	"context"
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"os"
@@ -13,9 +11,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/apache/rocketmq-clients/golang/v5"
+	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
+	"github.com/woxQAQ/im-service/pkg/common/mq"
 	"github.com/woxQAQ/im-service/pkg/utils"
 	"golang.org/x/sync/errgroup"
 )
@@ -36,6 +39,8 @@ type WsServer struct {
 
 	// wsMaxMsgLength limits the max length of message
 	wsMaxMsgLength int
+
+	rmqProducer golang.Producer
 
 	*validator.Validate
 	Encoder
@@ -64,7 +69,15 @@ func NewWsServer(configFile string, opts ...Option) (*WsServer, error) {
 	if config.maxMsgLength == 0 {
 		config.maxMsgLength = maxMessageSize
 	}
+
+	if config.rmqNameSrv == "" || config.rmqTopic == "" {
+		return nil, ErrMqConfigNotFound
+	}
 	validate := validator.New()
+	producer, err := mq.NewProducer(config.rmqNameSrv, config.rmqTopic)
+	if err != nil {
+		return nil, err
+	}
 	return &WsServer{
 		port:             config.port,
 		wsMaxConnNum:     config.maxConnNum,
@@ -73,6 +86,7 @@ func NewWsServer(configFile string, opts ...Option) (*WsServer, error) {
 		Validate:         validate,
 		Encoder:          newGobEncoder(),
 		RpcRouterHandler: newHandler(configFile, validate),
+		rmqProducer:      producer,
 		upgrader: &websocket.Upgrader{
 			HandshakeTimeout:  config.handshakeTimeout,
 			WriteBufferSize:   config.writeBufSize,
@@ -121,6 +135,10 @@ func (ws *WsServer) Bootstrap() error {
 		return srv.ListenAndServe()
 	})
 
+	wg.Go(func() error {
+		return ws.rmqProducer.Start()
+	})
+
 	signal.Notify(signs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-signs
 	go func() {
@@ -129,6 +147,7 @@ func (ws *WsServer) Bootstrap() error {
 		defer cancel()
 		_ = srv.Shutdown(ctx)
 		_ = wg.Wait()
+		ws.rmqProducer.GracefulStop()
 		close(done)
 	}()
 

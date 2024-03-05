@@ -11,12 +11,13 @@ enum Gender {
 message LoginRequest {
     string mobile = 1;
     string email = 2;
+    string userid = 5;
     string password = 3;
     string validate = 4;
 }
 
 message LoginResp {
-    int64 id = 1;
+    int64 userid = 1;
     string name = 2;
     Gender gender = 3;
     string email = 4;

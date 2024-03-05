@@ -1,27 +1,24 @@
 package mq
 
-import "github.com/segmentio/kafka-go"
+import (
+	"os"
 
-type Producer struct {
-	addr   []string
-	topic  string
-	writer *kafka.Writer
+	"github.com/apache/rocketmq-clients/golang/v5"
+)
+
+func init() {
+	os.Setenv("mq.consoleAppender.enabled", "true")
+
+	golang.ResetLogger()
 }
 
-func NewKafkaProducer(addr []string, topic string) (*Producer, error) {
-	p := Producer{
-		addr:  addr,
-		topic: topic,
+func NewProducer(endpoint string, topic string) (golang.Producer, error) {
+	// nil
+	producer, err := golang.NewProducer(&golang.Config{
+		Endpoint: endpoint,
+	}, golang.WithTopics(topic))
+	if err != nil {
+		return nil, err
 	}
-
-	// if the env variable is not set, use the default value
-	p.addr = readAddrFromEnv(p.addr)
-	writer := kafka.Writer{
-		Addr:         kafka.TCP(p.addr...),
-		Topic:        topic,
-		Balancer:     &kafka.LeastBytes{},
-		RequiredAcks: kafka.RequireAll,
-	}
-	p.writer = &writer
-	return &p, nil
+	return producer, nil
 }
