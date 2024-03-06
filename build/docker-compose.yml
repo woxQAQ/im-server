@@ -36,7 +36,7 @@ services:
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
     ports:
-      - "${ETCD_PORT}:2379"
+      - 2379:2379
     networks:
       - backend
     restart: always
@@ -193,11 +193,12 @@ services:
     ports:
       - "10911:10911"
       - "10909:10909"
+      - "8081:8081"
     volumes:
       - ./rocket/broker.conf:/etc/rocketmq/broker.conf
     depends_on:
       - rocketmq-nameserver
-    command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf"]
+    command: ["sh", "mqbroker", "-c", "/etc/rocketmq/broker.conf", "--enable-proxy"]
     environment:
       - NAMESRV_ADDR=rmqnamesrv:9876
       - JAVA_OPT_EXT=-server -Xms256m -Xmx256m -Xmn128m

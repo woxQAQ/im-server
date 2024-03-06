@@ -140,4 +140,5 @@ func (j *Jwt) RefreshToken(tokenString string) (string, error) {
 		return j.GetTokenWithClaims(claims)
 	}
 
+	return "", ErrTokenInvalid
 }

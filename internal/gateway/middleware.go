@@ -1,10 +1,12 @@
 package gateway
 
 import (
-	"github.com/golang-jwt/jwt/v4"
-	jwtTools "github.com/woxQAQ/im-service/pkg/common/jwt"
 	"net/http"
 	"strings"
+
+	"github.com/golang-jwt/jwt/v4"
+	jwtTools "github.com/woxQAQ/im-service/pkg/common/jwt"
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,7 +33,6 @@ func CorsHandler() gin.HandlerFunc {
 	}
 }
 
-
 func jwtHandler() gin.HandlerFunc {
 	return func(context *gin.Context) {
 		tokenString := context.GetHeader("Authentication")
@@ -43,6 +44,8 @@ func jwtHandler() gin.HandlerFunc {
 			context.Abort()
 			return
 		}
+
+		zap.S().Info(tokenString)
 
 		parts := strings.Split(tokenString, ".")
 		if len(parts) != 3 {
@@ -60,22 +63,22 @@ func jwtHandler() gin.HandlerFunc {
 		}
 
 		claims, err := j.ParseToken(tokenString)
-		
+
 		if err != nil {
 			if err == jwt.ErrTokenExpired {
 				context.JSON(http.StatusUnauthorized, gin.H{
 					"errCode": 13,
-					"errMsg": "your token has been expired",
+					"errMsg":  "your token has been expired",
 				})
 				context.Abort()
 				return
 			}
 			context.JSON(http.StatusUnauthorized, gin.H{
 				"errCode": 13,
-				"errMsg": err.Error(),
+				"errMsg":  err.Error(),
 			})
 			context.Abort()
-			return 
+			return
 		}
 
 		context.Set("Claims", claims)

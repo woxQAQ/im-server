@@ -1,0 +1,6 @@
+Topic: GATEWAY_WITH_ROUTE
+Config: 
+  Endpoint: 172.22.141.30:8081
+  Credenticals:
+    AccessKey:
+    AccessSecret:

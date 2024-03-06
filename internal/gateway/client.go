@@ -3,13 +3,14 @@ package gateway
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"log"
 	"runtime/debug"
 	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/apache/rocketmq-clients/golang/v5"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
@@ -25,10 +26,6 @@ var (
 	ErrPanic                     = errors.New("panic error")
 )
 
-const (
-	ServiceSingleChat = iota
-	ServiceGroupChat
-)
 
 type Client struct {
 	w *sync.Mutex
@@ -167,10 +164,19 @@ func (c *Client) Read() {
 			// remove '\n' to be space, and remove the message's edge's space
 			// is used to process multiline text to be one line
 			data = bytes.TrimSpace(bytes.Replace(data, []byte("\n"), []byte(" "), -1))
-			err := c.handlerRequest(data)
-			if err != nil {
-				zap.S().Error(err)
+			rmqMsg := golang.Message{
+				Topic: c.Server.rmqTopic,
+				Body:  data,
 			}
+
+			rmqMsg.SetTag("chatmsg")
+			c.Server.rmqProducer.SendAsync(context.TODO(), &rmqMsg, func(ctx context.Context, sr []*golang.SendReceipt, err error) {
+				if err != nil {
+					log.Fatal(err)
+				}
+			})
+
+
 		// PingMessage is used to validate a conn is alive or not
 		case websocket.PingMessage:
 			err = c.pingHandler()
@@ -184,24 +190,24 @@ func (c *Client) Read() {
 	}
 }
 
-func (c *Client) handlerRequest(Request []byte) error {
-	// TODO: handle message
-	var req = getReq()
-	defer freeReq(req)
+// func (c *Client) handlerRequest(Request []byte) error {
+// 	// TODO: handle message
+// 	var req = getReq()
+// 	defer freeReq(req)
 
-	err := json.Unmarshal(Request, req)
-	if err != nil {
-		return err
-	}
-	if req.SenderId != c.UserId {
-		return ErrSenderIdNotMatch
-	}
+// 	err := json.Unmarshal(Request, req)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	if req.SenderId != c.UserId {
+// 		return ErrSenderIdNotMatch
+// 	}
 
-	ctx := context.WithValue(context.Background(), "serviceId", req.SessionType)
-	_, err = c.Server.RpcRouterHandler.SendMessage(ctx, req)
+// 	ctx := context.WithValue(context.Background(), "serviceId", req.SessionType)
+// 	_, err = c.Server.RpcRouterHandler.SendMessage(ctx, req)
 
-	return err
-}
+//		return err
+//	}
 func (c *Client) pingHandler() error {
 	_ = c.Conn.SetReadDeadline(time.Now().Add(pongwait))
 	return c.writePongMessage()

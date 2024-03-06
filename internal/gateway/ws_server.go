@@ -42,13 +42,14 @@ type WsServer struct {
 
 	rmqProducer golang.Producer
 
+	rmqTopic string
+
 	*validator.Validate
 	Encoder
-	RpcRouterHandler
 }
 
 // NewWsServer gets a new websocket server
-func NewWsServer(configFile string, opts ...Option) (*WsServer, error) {
+func NewWsServer(rmqConfig *golang.Config, rmqTopic string, opts ...Option) (*WsServer, error) {
 	var config configs
 	for _, o := range opts {
 		o(&config)
@@ -70,23 +71,21 @@ func NewWsServer(configFile string, opts ...Option) (*WsServer, error) {
 		config.maxMsgLength = maxMessageSize
 	}
 
-	if config.rmqNameSrv == "" || config.rmqTopic == "" {
-		return nil, ErrMqConfigNotFound
-	}
 	validate := validator.New()
-	producer, err := mq.NewProducer(config.rmqNameSrv, config.rmqTopic)
+	producer, err := mq.NewProducer(rmqConfig, rmqTopic)
 	if err != nil {
 		return nil, err
 	}
+
 	return &WsServer{
-		port:             config.port,
-		wsMaxConnNum:     config.maxConnNum,
-		wsMaxMsgLength:   config.maxMsgLength,
-		clientManager:    newClientManager(),
-		Validate:         validate,
-		Encoder:          newGobEncoder(),
-		RpcRouterHandler: newHandler(configFile, validate),
-		rmqProducer:      producer,
+		port:           config.port,
+		wsMaxConnNum:   config.maxConnNum,
+		wsMaxMsgLength: config.maxMsgLength,
+		clientManager:  newClientManager(),
+		Validate:       validate,
+		Encoder:        newGobEncoder(),
+		rmqProducer:    producer,
+		rmqTopic:       rmqTopic,
 		upgrader: &websocket.Upgrader{
 			HandshakeTimeout:  config.handshakeTimeout,
 			WriteBufferSize:   config.writeBufSize,

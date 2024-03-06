@@ -16,11 +16,9 @@ var (
 	awaitDuration = time.Second * 5
 )
 
-func NewConsumer(endpoint string, topic string, consumerGroup string) (golang.Consumer, error) {
-	consumer, err := golang.NewSimpleConsumer(&golang.Config{
-		Endpoint:      endpoint,
-		ConsumerGroup: consumerGroup,
-	},
+func NewConsumer(config *golang.Config, topic string) (golang.SimpleConsumer, error) {
+	consumer, err := golang.NewSimpleConsumer(
+		config,
 		golang.WithAwaitDuration(awaitDuration),
 		golang.WithSubscriptionExpressions(map[string]*golang.FilterExpression{
 			topic: golang.SUB_ALL,
