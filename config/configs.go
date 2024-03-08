@@ -21,5 +21,10 @@ type RouterConfig struct {
 		ConsumerTopic string `validate:"required"`
 		ProducerTopic string `validate:"required"`
 	}
+}
 
+type SeqConfig struct {
+	Mysql struct{
+		DataSource string
+	}
 }

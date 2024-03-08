@@ -41,7 +41,7 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 // 		token, err = jwt.GetToken(secretkey, req.Email, accessExpired)
 // 	case 1:
 // 		// uid login
-// 		token, err = jwt.GetToken(secretkey, req.UserId, accessExpired)
+// 		token, err = jwt.GetToken(secretkey, req.user_id, accessExpired)
 // 	case 2:
 // 		// phone login
 // 		token, err = jwt.GetToken(secretkey, req.Mobile, accessExpired)

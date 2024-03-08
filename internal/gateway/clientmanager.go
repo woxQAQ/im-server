@@ -77,7 +77,7 @@ func (m *ClientMgr) Run(done chan struct{}) error {
 
 func (m *ClientMgr) RegisterClient(client *Client) {
 	_, userOk, clientOk := m.ClientMap.Get(client.UserId, client.PlatformId)
-	// There is No key "UserId" in the ClientMap.
+	// There is No key "user_id" in the ClientMap.
 	// It indicates that the user is login to the server for the first time
 	if !userOk {
 		m.ClientMap.Set(client.UserId, client)

@@ -1,0 +1,8 @@
+CREATE TABLE `sequence`  (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int UNSIGNED NOT NULL DEFAULT 0,
+  `cur_seq` int UNSIGNED NOT NULL DEFAULT 0,
+  `max_seq` int UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `idx_uid`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_bin ROW_FORMAT = Dynamic;

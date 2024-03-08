@@ -1,0 +1,22 @@
+Name: seq.rpc
+ListenOn: 0.0.0.0:8080
+Mode: dev
+Etcd:
+  Hosts:
+  - etcd:2379
+  Key: seq.rpc
+Seq:
+  Step: 100
+  DefaultMaxSeq: 0
+Mysql:
+  DataSource: 
+Rmq:
+  Config:
+    Endpoint:
+    Credenticals:
+      AccessKey:
+      AccessSecret:
+Topic:
+CacheRedis:
+  Host:
+  Type:

@@ -4,7 +4,7 @@ type (
 	// In my system, username can be repeated
 	LoginRequest {
 		Method   int    `json:"method"` // mobile 0 and Email 1, more method can be supported further
-		UserId   string `json:"userId"`
+		user_id   string `json:"userId"`
 		Mobile   string `json:"mobile"`
 		Email    string `json:"email"`
 		Password string `json:"password"`

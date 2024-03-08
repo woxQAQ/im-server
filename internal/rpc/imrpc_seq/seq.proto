@@ -1,0 +1,30 @@
+syntax = "proto3";
+package seq;
+option go_package = "/pb";
+
+message GetSeqRequest {
+    string user_id = 1;
+}
+
+message GetSeqResponse {
+    int32 err_code = 1;
+    string err_msg = 2;
+    uint32 cur_seq = 3;
+    uint32 max_seq = 4;
+}
+
+message SetDefaultSeqRequest {
+    string user_id = 1;
+}
+
+message SetDefaultSeqResponse {
+    string cur_seq = 1;
+    int32 err_code = 2;
+    string err_msg = 3;
+    
+}
+
+service seq {
+    rpc GetSeq(GetSeqRequest) returns (GetSeqResponse);
+    rpc SetDefaultSeq(SetDefaultSeqRequest) returns (SetDefaultSeqResponse);
+}

@@ -26,7 +26,6 @@ var (
 	ErrPanic                     = errors.New("panic error")
 )
 
-
 type Client struct {
 	w *sync.Mutex
 	// ClientId is the Identify of a Client
@@ -176,7 +175,6 @@ func (c *Client) Read() {
 				}
 			})
 
-
 		// PingMessage is used to validate a conn is alive or not
 		case websocket.PingMessage:
 			err = c.pingHandler()
@@ -199,7 +197,7 @@ func (c *Client) Read() {
 // 	if err != nil {
 // 		return err
 // 	}
-// 	if req.SenderId != c.UserId {
+// 	if req.SenderId != c.user_id {
 // 		return ErrSenderIdNotMatch
 // 	}
 
