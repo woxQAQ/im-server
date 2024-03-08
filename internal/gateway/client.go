@@ -119,7 +119,7 @@ func (c *Client) close() {
 	defer c.w.Unlock()
 
 	c.closed.Store(true)
-	c.Conn.Close()
+	_ = c.Conn.Close()
 	c.Server.clientManager.unregisterChan <- c
 }
 
@@ -231,14 +231,14 @@ func (c *Client) Write() {
 	ticker := time.NewTicker(54)
 	defer func() {
 		ticker.Stop()
-		c.Conn.Close()
+		_ = c.Conn.Close()
 	}()
 	for {
 		select {
 		case message, ok := <-c.MessageChan:
-			c.Conn.SetWriteDeadline(time.Now().Add(10))
+			_ = c.Conn.SetWriteDeadline(time.Now().Add(10))
 			if !ok {
-				c.Conn.WriteMessage(websocket.CloseMessage, nil)
+				_ = c.Conn.WriteMessage(websocket.CloseMessage, nil)
 				return
 			}
 
@@ -258,7 +258,7 @@ func (c *Client) Write() {
 				return
 			}
 		case <-ticker.C:
-			c.Conn.SetWriteDeadline(time.Now().Add(10))
+			_ = c.Conn.SetWriteDeadline(time.Now().Add(10))
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}

@@ -45,7 +45,6 @@ type WsServer struct {
 	rmqTopic string
 
 	*validator.Validate
-	Encoder
 }
 
 // NewWsServer gets a new websocket server
@@ -83,7 +82,6 @@ func NewWsServer(rmqConfig *golang.Config, rmqTopic string, opts ...Option) (*Ws
 		wsMaxMsgLength: config.maxMsgLength,
 		clientManager:  newClientManager(),
 		Validate:       validate,
-		Encoder:        newGobEncoder(),
 		rmqProducer:    producer,
 		rmqTopic:       rmqTopic,
 		upgrader: &websocket.Upgrader{

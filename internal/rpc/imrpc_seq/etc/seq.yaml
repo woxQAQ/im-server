@@ -1,10 +1,10 @@
-Name: seq.rpc
+Name: Seq.rpc
 ListenOn: 0.0.0.0:8080
 Mode: dev
 Etcd:
   Hosts:
   - etcd:2379
-  Key: seq.rpc
+  Key: Seq.rpc
 Seq:
   Step: 100
   DefaultMaxSeq: 0

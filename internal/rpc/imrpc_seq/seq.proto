@@ -9,8 +9,9 @@ message GetSeqRequest {
 message GetSeqResponse {
     int32 err_code = 1;
     string err_msg = 2;
-    uint32 cur_seq = 3;
-    uint32 max_seq = 4;
+    string err_dlt = 3;
+    uint32 cur_seq = 4;
+    uint32 max_seq = 5;
 }
 
 message SetDefaultSeqRequest {
@@ -21,10 +22,10 @@ message SetDefaultSeqResponse {
     string cur_seq = 1;
     int32 err_code = 2;
     string err_msg = 3;
-    
+    string err_dlt = 4;
 }
 
-service seq {
+service Seq {
     rpc GetSeq(GetSeqRequest) returns (GetSeqResponse);
     rpc SetDefaultSeq(SetDefaultSeqRequest) returns (SetDefaultSeqResponse);
 }

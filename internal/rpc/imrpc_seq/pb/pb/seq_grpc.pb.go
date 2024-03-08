@@ -19,8 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Seq_GetSeq_FullMethodName        = "/seq.seq/GetSeq"
-	Seq_SetDefaultSeq_FullMethodName = "/seq.seq/SetDefaultSeq"
+	Seq_GetSeq_FullMethodName        = "/seq.Seq/GetSeq"
+	Seq_SetDefaultSeq_FullMethodName = "/seq.Seq/SetDefaultSeq"
 )
 
 // SeqClient is the client API for Seq service.
@@ -129,7 +129,7 @@ func _Seq_SetDefaultSeq_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Seq_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "seq.seq",
+	ServiceName: "seq.Seq",
 	HandlerType: (*SeqServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

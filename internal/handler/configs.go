@@ -1,4 +1,4 @@
-package router
+package handler
 
 import (
 	"github.com/woxQAQ/im-service/config"

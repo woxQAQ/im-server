@@ -1,4 +1,4 @@
-package router
+package handler
 
 type ResponseData struct {
 	ClientMsgId string `json:"clientMsgId"`

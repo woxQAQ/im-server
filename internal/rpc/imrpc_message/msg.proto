@@ -2,17 +2,29 @@ syntax = "proto3";
 package msg;
 
 option go_package = "/pb";
-enum messageType {
-    MESSAGE_TYPE_TEXT = 0;
-    MESSAGE_TYPE_IMAGE = 1;
-    MESSAGE_TYPE_FILE = 2;
-    MESSAGE_TYPE_VIDEO = 3;
-    MESSAGE_TYPE_AUDIO = 4;
+enum contentType{
+    CONTENT_TYPE_TEXT = 0;
+    CONTENT_TYPE_IMAGE = 1;
+    CONTENT_TYPE_FILE = 2;
+    CONTENT_TYPE_VIDEO = 3;
+    CONTENT_TYPE_AUDIO = 4;
     //    MESSAGE_TYPE_LOCATION = 5;
 }
 
+message ResponseBase {
+    int32 err_code = 1;
+    string err_msg= 2;
+    string err_del = 3;
+}
+
 message MsgData {
-    string content = 1;
+    // 客户端维护的消息id
+    int64 cur_msg_id = 1;
+    // 最后一条发出消息的id，一般为cur_msg_id + 1
+    int64 pre_msg_id = 2;
+    string content = 4;
+    int64 send_time = 6;
+    contentType content_type = 5;
 }
 
 message RespData{
@@ -25,16 +37,25 @@ message SendMessageReq{
     string sender_id = 1;
     string receiver_id = 2;
     string group_id = 4;
+    string msg_type = 3;
     MsgData content =5;
-    messageType content_type = 6;
 }
 
 message SendMessageResp{
-    int32 err_code = 1;
-    string err_msg= 2;
-    string err_del = 3;
-    RespData data = 4;
+    ResponseBase base = 1;
+    RespData data = 2;
 }
+
+message PullMessageWithSeqReq {
+    int64 client_id = 1;
+    int64 seq = 2;
+}
+
+message PullMessageWithSeqResp {
+    ResponseBase base =1;
+    repeated MsgData data_list = 2;
+}
+
 service Msg {
     rpc SendMsg(SendMessageReq) returns (SendMessageResp) {}
 }

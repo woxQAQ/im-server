@@ -13,10 +13,13 @@ import (
 )
 
 type (
-	MsgData         = pb.MsgData
-	RespData        = pb.RespData
-	SendMessageReq  = pb.SendMessageReq
-	SendMessageResp = pb.SendMessageResp
+	MsgData                = pb.MsgData
+	PullMessageWithSeqReq  = pb.PullMessageWithSeqReq
+	PullMessageWithSeqResp = pb.PullMessageWithSeqResp
+	RespData               = pb.RespData
+	ResponseBase           = pb.ResponseBase
+	SendMessageReq         = pb.SendMessageReq
+	SendMessageResp        = pb.SendMessageResp
 
 	Msg interface {
 		SendMsg(ctx context.Context, in *SendMessageReq, opts ...grpc.CallOption) (*SendMessageResp, error)
