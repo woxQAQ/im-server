@@ -12,7 +12,7 @@ func init() {
 	golang.ResetLogger()
 }
 
-// func NewProducer(endpoint string, topic string) (golang.Producer, error) {
+// func NewProducer(endpoint string, topic string) (golang.Produce, error) {
 // 	// nil
 // 	producer, err := golang.NewProducer(&golang.Config{
 // 		Endpoint: endpoint,

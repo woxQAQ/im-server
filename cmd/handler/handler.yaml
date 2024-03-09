@@ -1,0 +1,14 @@
+RmqConfig:
+  Endpoint: 172.22.141.30:8081
+  ConsumerGroup: HandlerToGateway
+  Credentials:
+    AccessKey:
+    AccessSecret:
+Topic:
+  ConsumerTopic: GATEWAY_WITH_ROUTE
+  ProducerTopic: GATEWAY_WITH_ROUTE
+RpcConfig:
+  Etcd:
+    Hosts:
+      - etcd:2379
+    Key: msg.rpc

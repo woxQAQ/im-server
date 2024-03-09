@@ -163,11 +163,14 @@ func (c *Client) Read() {
 			// remove '\n' to be space, and remove the message's edge's space
 			// is used to process multiline text to be one line
 			data = bytes.TrimSpace(bytes.Replace(data, []byte("\n"), []byte(" "), -1))
+
+			// init rmq message
 			rmqMsg := golang.Message{
 				Topic: c.Server.rmqTopic,
 				Body:  data,
 			}
 
+			// send to rmq with tag
 			rmqMsg.SetTag("chatmsg")
 			c.Server.rmqProducer.SendAsync(context.TODO(), &rmqMsg, func(ctx context.Context, sr []*golang.SendReceipt, err error) {
 				if err != nil {

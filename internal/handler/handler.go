@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/go-playground/validator/v10"
+	"github.com/woxQAQ/im-service/config"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/msg"
 	"github.com/woxQAQ/im-service/pkg/utils"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/apache/rocketmq-clients/golang/v5"
 	"github.com/panjf2000/ants/v2"
-	"github.com/woxQAQ/im-service/config"
 	"github.com/woxQAQ/im-service/pkg/common/mq"
 )
 
@@ -39,9 +39,10 @@ type Handler struct {
 
 	rmqProducerTopic string
 
-	msg      msg.Msg
-	validate *validator.Validate
-	reqPool  sync.Pool
+	msg        msg.Msg
+	validate   *validator.Validate
+	reqPool    sync.Pool
+	bufferPool sync.Pool
 	Encoder
 	utils.Retry
 }
@@ -51,11 +52,17 @@ type RpcRouterHandler interface {
 	DataAccept(context.Context, chan []byte)
 }
 
-func New(config *config.RouterConfig) (*Handler, error) {
+func New(config *config.HandlerConfig) (*Handler, error) {
 	// init consumers
+	rmqConfig, err := config.RmqConfig.GetConf()
+
+	if err != nil {
+		return nil, err
+	}
+
 	var consumerList []golang.SimpleConsumer
 	for i := 0; i < consumerNum; i++ {
-		consumer, err := mq.NewConsumer(&config.RmqConfig, config.Topic.ConsumerTopic)
+		consumer, err := mq.NewConsumer(rmqConfig, config.Topic.ConsumerTopic)
 		if err != nil {
 			return nil, err
 		}
@@ -63,7 +70,7 @@ func New(config *config.RouterConfig) (*Handler, error) {
 	}
 
 	// init producers
-	producer, err := mq.NewProducer(&config.RmqConfig, config.Topic.ProducerTopic)
+	producer, err := mq.NewProducer(rmqConfig, config.Topic.ProducerTopic)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +90,10 @@ func New(config *config.RouterConfig) (*Handler, error) {
 		msg:              msg.NewMsg(zrpc.MustNewClient(config.RpcConfig)),
 		Encoder:          newGobEncoder(),
 		reqPool: sync.Pool{New: func() any {
-			return new(*SendRequest)
+			return new(SendRequest)
+		}},
+		bufferPool: sync.Pool{New: func() any {
+			return make([]byte, 0, 1024)
 		}},
 		Retry: utils.NewSimpleRetry(retryTimes, time.Second),
 	}
@@ -91,6 +101,16 @@ func New(config *config.RouterConfig) (*Handler, error) {
 	return handler, nil
 }
 
+func (h *Handler) getReq() SendRequest {
+	return h.reqPool.Get().(SendRequest)
+}
+
+func (h *Handler) getBuf() []byte {
+	return h.bufferPool.Get().([]byte)
+}
+
+// Run begins consumer to rockerMq with topic
+// get message from consumer and call msg rpc
 func (h *Handler) Run() error {
 	err := h.mqConnector.Receive(context.Background())
 	if err != nil {
@@ -115,10 +135,15 @@ func (h *Handler) handlerMessage(context context.Context, data []byte) error {
 		zap.S().Errorf("Decode error, err: %v", err)
 	}
 
-	for i := 0; i < retryTimes; i++ {
-	}
+	resp := h.getBuf()
 
-	resp, err := h.SendMessage(context, req)
+	err = h.Do(func() error {
+		resp, err = h.SendMessage(context, req)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
 	if err != nil {
 		return err
 	}
@@ -130,11 +155,12 @@ func (h *Handler) handlerMessage(context context.Context, data []byte) error {
 		Body:  resp,
 	}
 
-	err = h.Producer(context, message)
+	err = h.Produce(context, message)
 	if err != nil {
 		return err
 	}
 
+	h.bufferPool.Put(resp)
 	return nil
 }
 
@@ -143,13 +169,7 @@ func (h *Handler) DataAccept(context context.Context, messageChan chan []byte) {
 		select {
 		case data := <-messageChan:
 			go func() {
-				err := h.Do(func() error {
-					err := h.handlerMessage(context, data)
-					if err != nil {
-						return err
-					}
-					return nil
-				})
+				err := h.handlerMessage(context, data)
 
 				if err != nil {
 					zap.S().Errorln(err)

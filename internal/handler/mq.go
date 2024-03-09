@@ -9,7 +9,7 @@ import (
 
 type Connector interface {
 	Receive(ctx context.Context) error
-	Producer(ctx context.Context, message *golang.Message) error
+	Produce(ctx context.Context, message *golang.Message) error
 }
 
 type mqConnector struct {
@@ -28,7 +28,7 @@ type mqConnector struct {
 
 var _ Connector = (*mqConnector)(nil)
 
-func (c *mqConnector) Producer(ctx context.Context, message *golang.Message) error {
+func (c *mqConnector) Produce(ctx context.Context, message *golang.Message) error {
 	//defer func() {
 	//}()
 
@@ -70,7 +70,7 @@ func (c *mqConnector) Receive(ctx context.Context) error {
 	return nil
 }
 
-//func (c *mqConnector) producerRun(producer golang.Producer, wg *sync.WaitGroup) {
+//func (c *mqConnector) producerRun(producer golang.Produce, wg *sync.WaitGroup) {
 //	//todo
 //}
 

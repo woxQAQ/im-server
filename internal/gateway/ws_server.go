@@ -95,6 +95,7 @@ func NewWsServer(rmqConfig *golang.Config, rmqTopic string, opts ...Option) (*Ws
 	}, nil
 }
 
+// ReplaceLogger replace global log
 func ReplaceLogger() {
 	logger, err := zap.NewDevelopment()
 	if err != nil {
@@ -103,6 +104,10 @@ func ReplaceLogger() {
 	zap.ReplaceGlobals(logger)
 }
 
+// Bootstrap begin wsServer
+// 1. start http server -> websocket server
+// 2. start clientManager
+// 3. start rocketMq producer
 func (ws *WsServer) Bootstrap() error {
 	var (
 		wg errgroup.Group
