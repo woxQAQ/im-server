@@ -10,8 +10,10 @@ RUN apt-get update && \
         apt-get upgrade -y && \
         apt-get install -y --no-install-recommends unzip curl zip git vim screen
 
+RUN go get github.com/go-delve/delve/cmd/dlv
+
 USER root
-RUN go install github.com/tal-tech/go-zero/tools/goctl@cli
+RUN go install github.com/zeromicro/go-zero/tools/goctl@latest
 
 USER root
 RUN curl -L -o /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip && \

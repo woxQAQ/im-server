@@ -19,16 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Seq_GetSeq_FullMethodName        = "/seq.Seq/GetSeq"
-	Seq_SetDefaultSeq_FullMethodName = "/seq.Seq/SetDefaultSeq"
+	Seq_GetSessionSeq_FullMethodName = "/seq.Seq/GetSessionSeq"
 )
 
 // SeqClient is the client API for Seq service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SeqClient interface {
-	GetSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error)
-	SetDefaultSeq(ctx context.Context, in *SetDefaultSeqRequest, opts ...grpc.CallOption) (*SetDefaultSeqResponse, error)
+	GetSessionSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error)
 }
 
 type seqClient struct {
@@ -39,18 +37,9 @@ func NewSeqClient(cc grpc.ClientConnInterface) SeqClient {
 	return &seqClient{cc}
 }
 
-func (c *seqClient) GetSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error) {
+func (c *seqClient) GetSessionSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error) {
 	out := new(GetSeqResponse)
-	err := c.cc.Invoke(ctx, Seq_GetSeq_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *seqClient) SetDefaultSeq(ctx context.Context, in *SetDefaultSeqRequest, opts ...grpc.CallOption) (*SetDefaultSeqResponse, error) {
-	out := new(SetDefaultSeqResponse)
-	err := c.cc.Invoke(ctx, Seq_SetDefaultSeq_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, Seq_GetSessionSeq_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -61,8 +50,7 @@ func (c *seqClient) SetDefaultSeq(ctx context.Context, in *SetDefaultSeqRequest,
 // All implementations must embed UnimplementedSeqServer
 // for forward compatibility
 type SeqServer interface {
-	GetSeq(context.Context, *GetSeqRequest) (*GetSeqResponse, error)
-	SetDefaultSeq(context.Context, *SetDefaultSeqRequest) (*SetDefaultSeqResponse, error)
+	GetSessionSeq(context.Context, *GetSeqRequest) (*GetSeqResponse, error)
 	mustEmbedUnimplementedSeqServer()
 }
 
@@ -70,11 +58,8 @@ type SeqServer interface {
 type UnimplementedSeqServer struct {
 }
 
-func (UnimplementedSeqServer) GetSeq(context.Context, *GetSeqRequest) (*GetSeqResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSeq not implemented")
-}
-func (UnimplementedSeqServer) SetDefaultSeq(context.Context, *SetDefaultSeqRequest) (*SetDefaultSeqResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetDefaultSeq not implemented")
+func (UnimplementedSeqServer) GetSessionSeq(context.Context, *GetSeqRequest) (*GetSeqResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSessionSeq not implemented")
 }
 func (UnimplementedSeqServer) mustEmbedUnimplementedSeqServer() {}
 
@@ -89,38 +74,20 @@ func RegisterSeqServer(s grpc.ServiceRegistrar, srv SeqServer) {
 	s.RegisterService(&Seq_ServiceDesc, srv)
 }
 
-func _Seq_GetSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Seq_GetSessionSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetSeqRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SeqServer).GetSeq(ctx, in)
+		return srv.(SeqServer).GetSessionSeq(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Seq_GetSeq_FullMethodName,
+		FullMethod: Seq_GetSessionSeq_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SeqServer).GetSeq(ctx, req.(*GetSeqRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Seq_SetDefaultSeq_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetDefaultSeqRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SeqServer).SetDefaultSeq(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Seq_SetDefaultSeq_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SeqServer).SetDefaultSeq(ctx, req.(*SetDefaultSeqRequest))
+		return srv.(SeqServer).GetSessionSeq(ctx, req.(*GetSeqRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -133,12 +100,8 @@ var Seq_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*SeqServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetSeq",
-			Handler:    _Seq_GetSeq_Handler,
-		},
-		{
-			MethodName: "SetDefaultSeq",
-			Handler:    _Seq_SetDefaultSeq_Handler,
+			MethodName: "GetSessionSeq",
+			Handler:    _Seq_GetSessionSeq_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

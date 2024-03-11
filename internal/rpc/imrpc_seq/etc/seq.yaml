@@ -9,10 +9,10 @@ Seq:
   Step: 100
   DefaultMaxSeq: 0
 Mysql:
-  DataSource: 
+  DataSource: root:123456@tcp(mysql:3306)/im_seq?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
 Rmq:
   Config:
-    Endpoint:
+    Endpoint: 172.22.141.30:8081
     Credenticals:
       AccessKey:
       AccessSecret:

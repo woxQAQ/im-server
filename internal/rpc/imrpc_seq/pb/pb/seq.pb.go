@@ -20,18 +20,139 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+type OperationType int32
+
+const (
+	// get session-space sequence id
+	OperationType_OPERATION_TYPE_SESSION OperationType = 0
+	// get group-session-space sequence id
+	// equals with session
+	OperationType_OPERATION_TYPE_GID OperationType = 2
+	// get user id
+	OperationType_OPERATION_TYPE_GETUID OperationType = 3
+	// get group id
+	OperationType_OPERATION_TYPE_GETGID OperationType = 4 // todo: more operation...
+)
+
+// Enum value maps for OperationType.
+var (
+	OperationType_name = map[int32]string{
+		0: "OPERATION_TYPE_SESSION",
+		2: "OPERATION_TYPE_GID",
+		3: "OPERATION_TYPE_GETUID",
+		4: "OPERATION_TYPE_GETGID",
+	}
+	OperationType_value = map[string]int32{
+		"OPERATION_TYPE_SESSION": 0,
+		"OPERATION_TYPE_GID":     2,
+		"OPERATION_TYPE_GETUID":  3,
+		"OPERATION_TYPE_GETGID":  4,
+	}
+)
+
+func (x OperationType) Enum() *OperationType {
+	p := new(OperationType)
+	*p = x
+	return p
+}
+
+func (x OperationType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (OperationType) Descriptor() protoreflect.EnumDescriptor {
+	return file_seq_proto_enumTypes[0].Descriptor()
+}
+
+func (OperationType) Type() protoreflect.EnumType {
+	return &file_seq_proto_enumTypes[0]
+}
+
+func (x OperationType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use OperationType.Descriptor instead.
+func (OperationType) EnumDescriptor() ([]byte, []int) {
+	return file_seq_proto_rawDescGZIP(), []int{0}
+}
+
+type RespBase struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ErrCode int32  `protobuf:"varint,1,opt,name=err_code,json=errCode,proto3" json:"err_code,omitempty"`
+	ErrMsg  string `protobuf:"bytes,2,opt,name=err_msg,json=errMsg,proto3" json:"err_msg,omitempty"`
+	ErrDlt  string `protobuf:"bytes,3,opt,name=err_dlt,json=errDlt,proto3" json:"err_dlt,omitempty"`
+}
+
+func (x *RespBase) Reset() {
+	*x = RespBase{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_seq_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *RespBase) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RespBase) ProtoMessage() {}
+
+func (x *RespBase) ProtoReflect() protoreflect.Message {
+	mi := &file_seq_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RespBase.ProtoReflect.Descriptor instead.
+func (*RespBase) Descriptor() ([]byte, []int) {
+	return file_seq_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *RespBase) GetErrCode() int32 {
+	if x != nil {
+		return x.ErrCode
+	}
+	return 0
+}
+
+func (x *RespBase) GetErrMsg() string {
+	if x != nil {
+		return x.ErrMsg
+	}
+	return ""
+}
+
+func (x *RespBase) GetErrDlt() string {
+	if x != nil {
+		return x.ErrDlt
+	}
+	return ""
+}
+
 type GetSeqRequest struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	SessionId int64         `protobuf:"varint,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Type      OperationType `protobuf:"varint,3,opt,name=type,proto3,enum=seq.OperationType" json:"type,omitempty"`
 }
 
 func (x *GetSeqRequest) Reset() {
 	*x = GetSeqRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_seq_proto_msgTypes[0]
+		mi := &file_seq_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -44,7 +165,7 @@ func (x *GetSeqRequest) String() string {
 func (*GetSeqRequest) ProtoMessage() {}
 
 func (x *GetSeqRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_seq_proto_msgTypes[0]
+	mi := &file_seq_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -57,14 +178,21 @@ func (x *GetSeqRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSeqRequest.ProtoReflect.Descriptor instead.
 func (*GetSeqRequest) Descriptor() ([]byte, []int) {
-	return file_seq_proto_rawDescGZIP(), []int{0}
+	return file_seq_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *GetSeqRequest) GetUserId() string {
+func (x *GetSeqRequest) GetSessionId() int64 {
 	if x != nil {
-		return x.UserId
+		return x.SessionId
 	}
-	return ""
+	return 0
+}
+
+func (x *GetSeqRequest) GetType() OperationType {
+	if x != nil {
+		return x.Type
+	}
+	return OperationType_OPERATION_TYPE_SESSION
 }
 
 type GetSeqResponse struct {
@@ -72,16 +200,17 @@ type GetSeqResponse struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ErrCode int32  `protobuf:"varint,1,opt,name=err_code,json=errCode,proto3" json:"err_code,omitempty"`
-	ErrMsg  string `protobuf:"bytes,2,opt,name=err_msg,json=errMsg,proto3" json:"err_msg,omitempty"`
-	CurSeq  uint32 `protobuf:"varint,3,opt,name=cur_seq,json=curSeq,proto3" json:"cur_seq,omitempty"`
-	MaxSeq  uint32 `protobuf:"varint,4,opt,name=max_seq,json=maxSeq,proto3" json:"max_seq,omitempty"`
+	Base    *RespBase     `protobuf:"bytes,1,opt,name=base,proto3" json:"base,omitempty"`
+	CurSeq  int64         `protobuf:"varint,2,opt,name=cur_seq,json=curSeq,proto3" json:"cur_seq,omitempty"`
+	UserId  int64         `protobuf:"varint,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Type    OperationType `protobuf:"varint,4,opt,name=type,proto3,enum=seq.OperationType" json:"type,omitempty"`
+	GroupId int64         `protobuf:"varint,5,opt,name=group_id,json=groupId,proto3" json:"group_id,omitempty"` // uint32 max_seq = 3;
 }
 
 func (x *GetSeqResponse) Reset() {
 	*x = GetSeqResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_seq_proto_msgTypes[1]
+		mi := &file_seq_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -94,7 +223,7 @@ func (x *GetSeqResponse) String() string {
 func (*GetSeqResponse) ProtoMessage() {}
 
 func (x *GetSeqResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_seq_proto_msgTypes[1]
+	mi := &file_seq_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -107,180 +236,83 @@ func (x *GetSeqResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSeqResponse.ProtoReflect.Descriptor instead.
 func (*GetSeqResponse) Descriptor() ([]byte, []int) {
-	return file_seq_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *GetSeqResponse) GetErrCode() int32 {
-	if x != nil {
-		return x.ErrCode
-	}
-	return 0
-}
-
-func (x *GetSeqResponse) GetErrMsg() string {
-	if x != nil {
-		return x.ErrMsg
-	}
-	return ""
-}
-
-func (x *GetSeqResponse) GetCurSeq() uint32 {
-	if x != nil {
-		return x.CurSeq
-	}
-	return 0
-}
-
-func (x *GetSeqResponse) GetMaxSeq() uint32 {
-	if x != nil {
-		return x.MaxSeq
-	}
-	return 0
-}
-
-type SetDefaultSeqRequest struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-}
-
-func (x *SetDefaultSeqRequest) Reset() {
-	*x = SetDefaultSeqRequest{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_seq_proto_msgTypes[2]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SetDefaultSeqRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetDefaultSeqRequest) ProtoMessage() {}
-
-func (x *SetDefaultSeqRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_seq_proto_msgTypes[2]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetDefaultSeqRequest.ProtoReflect.Descriptor instead.
-func (*SetDefaultSeqRequest) Descriptor() ([]byte, []int) {
 	return file_seq_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *SetDefaultSeqRequest) GetUserId() string {
+func (x *GetSeqResponse) GetBase() *RespBase {
 	if x != nil {
-		return x.UserId
+		return x.Base
 	}
-	return ""
+	return nil
 }
 
-type SetDefaultSeqResponse struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	CurSeq  string `protobuf:"bytes,1,opt,name=cur_seq,json=curSeq,proto3" json:"cur_seq,omitempty"`
-	ErrCode int32  `protobuf:"varint,2,opt,name=err_code,json=errCode,proto3" json:"err_code,omitempty"`
-	ErrMsg  string `protobuf:"bytes,3,opt,name=err_msg,json=errMsg,proto3" json:"err_msg,omitempty"`
-}
-
-func (x *SetDefaultSeqResponse) Reset() {
-	*x = SetDefaultSeqResponse{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_seq_proto_msgTypes[3]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *SetDefaultSeqResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SetDefaultSeqResponse) ProtoMessage() {}
-
-func (x *SetDefaultSeqResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_seq_proto_msgTypes[3]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SetDefaultSeqResponse.ProtoReflect.Descriptor instead.
-func (*SetDefaultSeqResponse) Descriptor() ([]byte, []int) {
-	return file_seq_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *SetDefaultSeqResponse) GetCurSeq() string {
+func (x *GetSeqResponse) GetCurSeq() int64 {
 	if x != nil {
 		return x.CurSeq
-	}
-	return ""
-}
-
-func (x *SetDefaultSeqResponse) GetErrCode() int32 {
-	if x != nil {
-		return x.ErrCode
 	}
 	return 0
 }
 
-func (x *SetDefaultSeqResponse) GetErrMsg() string {
+func (x *GetSeqResponse) GetUserId() int64 {
 	if x != nil {
-		return x.ErrMsg
+		return x.UserId
 	}
-	return ""
+	return 0
+}
+
+func (x *GetSeqResponse) GetType() OperationType {
+	if x != nil {
+		return x.Type
+	}
+	return OperationType_OPERATION_TYPE_SESSION
+}
+
+func (x *GetSeqResponse) GetGroupId() int64 {
+	if x != nil {
+		return x.GroupId
+	}
+	return 0
 }
 
 var File_seq_proto protoreflect.FileDescriptor
 
 var file_seq_proto_rawDesc = []byte{
 	0x0a, 0x09, 0x73, 0x65, 0x71, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x03, 0x73, 0x65, 0x71,
-	0x22, 0x28, 0x0a, 0x0d, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
-	0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01,
-	0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x22, 0x76, 0x0a, 0x0e, 0x47, 0x65,
-	0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x19, 0x0a, 0x08,
+	0x22, 0x57, 0x0a, 0x08, 0x52, 0x65, 0x73, 0x70, 0x42, 0x61, 0x73, 0x65, 0x12, 0x19, 0x0a, 0x08,
 	0x65, 0x72, 0x72, 0x5f, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07,
 	0x65, 0x72, 0x72, 0x43, 0x6f, 0x64, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x65, 0x72, 0x72, 0x5f, 0x6d,
 	0x73, 0x67, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x65, 0x72, 0x72, 0x4d, 0x73, 0x67,
-	0x12, 0x17, 0x0a, 0x07, 0x63, 0x75, 0x72, 0x5f, 0x73, 0x65, 0x71, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x0d, 0x52, 0x06, 0x63, 0x75, 0x72, 0x53, 0x65, 0x71, 0x12, 0x17, 0x0a, 0x07, 0x6d, 0x61, 0x78,
-	0x5f, 0x73, 0x65, 0x71, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x06, 0x6d, 0x61, 0x78, 0x53,
-	0x65, 0x71, 0x22, 0x2f, 0x0a, 0x14, 0x53, 0x65, 0x74, 0x44, 0x65, 0x66, 0x61, 0x75, 0x6c, 0x74,
-	0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x17, 0x0a, 0x07, 0x75, 0x73,
-	0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65,
-	0x72, 0x49, 0x64, 0x22, 0x64, 0x0a, 0x15, 0x53, 0x65, 0x74, 0x44, 0x65, 0x66, 0x61, 0x75, 0x6c,
-	0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x17, 0x0a, 0x07,
-	0x63, 0x75, 0x72, 0x5f, 0x73, 0x65, 0x71, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x63,
-	0x75, 0x72, 0x53, 0x65, 0x71, 0x12, 0x19, 0x0a, 0x08, 0x65, 0x72, 0x72, 0x5f, 0x63, 0x6f, 0x64,
-	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x07, 0x65, 0x72, 0x72, 0x43, 0x6f, 0x64, 0x65,
-	0x12, 0x17, 0x0a, 0x07, 0x65, 0x72, 0x72, 0x5f, 0x6d, 0x73, 0x67, 0x18, 0x03, 0x20, 0x01, 0x28,
-	0x09, 0x52, 0x06, 0x65, 0x72, 0x72, 0x4d, 0x73, 0x67, 0x32, 0x80, 0x01, 0x0a, 0x03, 0x53, 0x65,
-	0x71, 0x12, 0x31, 0x0a, 0x06, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x12, 0x12, 0x2e, 0x73, 0x65,
-	0x71, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a,
-	0x13, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x73, 0x70,
-	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x46, 0x0a, 0x0d, 0x53, 0x65, 0x74, 0x44, 0x65, 0x66, 0x61, 0x75,
-	0x6c, 0x74, 0x53, 0x65, 0x71, 0x12, 0x19, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x53, 0x65, 0x74, 0x44,
-	0x65, 0x66, 0x61, 0x75, 0x6c, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
-	0x1a, 0x1a, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x53, 0x65, 0x74, 0x44, 0x65, 0x66, 0x61, 0x75, 0x6c,
-	0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x05, 0x5a, 0x03,
-	0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x12, 0x17, 0x0a, 0x07, 0x65, 0x72, 0x72, 0x5f, 0x64, 0x6c, 0x74, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x06, 0x65, 0x72, 0x72, 0x44, 0x6c, 0x74, 0x22, 0x56, 0x0a, 0x0d, 0x47, 0x65, 0x74,
+	0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x73, 0x65,
+	0x73, 0x73, 0x69, 0x6f, 0x6e, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
+	0x73, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x22, 0xa8, 0x01, 0x0a, 0x0e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x21, 0x0a, 0x04, 0x62, 0x61, 0x73, 0x65, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x0d, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x52, 0x65, 0x73, 0x70, 0x42, 0x61, 0x73,
+	0x65, 0x52, 0x04, 0x62, 0x61, 0x73, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x63, 0x75, 0x72, 0x5f, 0x73,
+	0x65, 0x71, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x63, 0x75, 0x72, 0x53, 0x65, 0x71,
+	0x12, 0x17, 0x0a, 0x07, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x64, 0x12, 0x26, 0x0a, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x12, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x4f, 0x70,
+	0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x52, 0x04, 0x74, 0x79, 0x70,
+	0x65, 0x12, 0x19, 0x0a, 0x08, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x5f, 0x69, 0x64, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x07, 0x67, 0x72, 0x6f, 0x75, 0x70, 0x49, 0x64, 0x2a, 0x79, 0x0a, 0x0d,
+	0x4f, 0x70, 0x65, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12, 0x1a, 0x0a,
+	0x16, 0x4f, 0x50, 0x45, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f,
+	0x53, 0x45, 0x53, 0x53, 0x49, 0x4f, 0x4e, 0x10, 0x00, 0x12, 0x16, 0x0a, 0x12, 0x4f, 0x50, 0x45,
+	0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x47, 0x49, 0x44, 0x10,
+	0x02, 0x12, 0x19, 0x0a, 0x15, 0x4f, 0x50, 0x45, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x54,
+	0x59, 0x50, 0x45, 0x5f, 0x47, 0x45, 0x54, 0x55, 0x49, 0x44, 0x10, 0x03, 0x12, 0x19, 0x0a, 0x15,
+	0x4f, 0x50, 0x45, 0x52, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x54, 0x59, 0x50, 0x45, 0x5f, 0x47,
+	0x45, 0x54, 0x47, 0x49, 0x44, 0x10, 0x04, 0x32, 0x3f, 0x0a, 0x03, 0x53, 0x65, 0x71, 0x12, 0x38,
+	0x0a, 0x0d, 0x47, 0x65, 0x74, 0x53, 0x65, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x53, 0x65, 0x71, 0x12,
+	0x12, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71, 0x52, 0x65, 0x71, 0x75,
+	0x65, 0x73, 0x74, 0x1a, 0x13, 0x2e, 0x73, 0x65, 0x71, 0x2e, 0x47, 0x65, 0x74, 0x53, 0x65, 0x71,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x05, 0x5a, 0x03, 0x2f, 0x70, 0x62, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -295,23 +327,25 @@ func file_seq_proto_rawDescGZIP() []byte {
 	return file_seq_proto_rawDescData
 }
 
-var file_seq_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_seq_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_seq_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_seq_proto_goTypes = []interface{}{
-	(*GetSeqRequest)(nil),         // 0: seq.GetSeqRequest
-	(*GetSeqResponse)(nil),        // 1: seq.GetSeqResponse
-	(*SetDefaultSeqRequest)(nil),  // 2: seq.SetDefaultSeqRequest
-	(*SetDefaultSeqResponse)(nil), // 3: seq.SetDefaultSeqResponse
+	(OperationType)(0),     // 0: seq.OperationType
+	(*RespBase)(nil),       // 1: seq.RespBase
+	(*GetSeqRequest)(nil),  // 2: seq.GetSeqRequest
+	(*GetSeqResponse)(nil), // 3: seq.GetSeqResponse
 }
 var file_seq_proto_depIdxs = []int32{
-	0, // 0: seq.Seq.GetSeq:input_type -> seq.GetSeqRequest
-	2, // 1: seq.Seq.SetDefaultSeq:input_type -> seq.SetDefaultSeqRequest
-	1, // 2: seq.Seq.GetSeq:output_type -> seq.GetSeqResponse
-	3, // 3: seq.Seq.SetDefaultSeq:output_type -> seq.SetDefaultSeqResponse
-	2, // [2:4] is the sub-list for method output_type
-	0, // [0:2] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	0, // 0: seq.GetSeqRequest.type:type_name -> seq.OperationType
+	1, // 1: seq.GetSeqResponse.base:type_name -> seq.RespBase
+	0, // 2: seq.GetSeqResponse.type:type_name -> seq.OperationType
+	2, // 3: seq.Seq.GetSessionSeq:input_type -> seq.GetSeqRequest
+	3, // 4: seq.Seq.GetSessionSeq:output_type -> seq.GetSeqResponse
+	4, // [4:5] is the sub-list for method output_type
+	3, // [3:4] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_seq_proto_init() }
@@ -321,7 +355,7 @@ func file_seq_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_seq_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetSeqRequest); i {
+			switch v := v.(*RespBase); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -333,7 +367,7 @@ func file_seq_proto_init() {
 			}
 		}
 		file_seq_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GetSeqResponse); i {
+			switch v := v.(*GetSeqRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -345,19 +379,7 @@ func file_seq_proto_init() {
 			}
 		}
 		file_seq_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SetDefaultSeqRequest); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_seq_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*SetDefaultSeqResponse); i {
+			switch v := v.(*GetSeqResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -374,13 +396,14 @@ func file_seq_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_seq_proto_rawDesc,
-			NumEnums:      0,
-			NumMessages:   4,
+			NumEnums:      1,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_seq_proto_goTypes,
 		DependencyIndexes: file_seq_proto_depIdxs,
+		EnumInfos:         file_seq_proto_enumTypes,
 		MessageInfos:      file_seq_proto_msgTypes,
 	}.Build()
 	File_seq_proto = out.File

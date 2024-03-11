@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/config"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/server"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/svc"

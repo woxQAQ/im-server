@@ -22,12 +22,7 @@ func NewSeqServer(svcCtx *svc.ServiceContext) *SeqServer {
 	}
 }
 
-func (s *SeqServer) GetSeq(ctx context.Context, in *pb.GetSeqRequest) (*pb.GetSeqResponse, error) {
-	l := logic.NewGetSeqLogic(ctx, s.svcCtx)
-	return l.GetSeq(in)
-}
-
-func (s *SeqServer) SetDefaultSeq(ctx context.Context, in *pb.SetDefaultSeqRequest) (*pb.SetDefaultSeqResponse, error) {
-	l := logic.NewSetDefaultSeqLogic(ctx, s.svcCtx)
-	return l.SetDefaultSeq(in)
+func (s *SeqServer) GetSessionSeq(ctx context.Context, in *pb.GetSeqRequest) (*pb.GetSeqResponse, error) {
+	l := logic.NewGetSessionSeqLogic(ctx, s.svcCtx)
+	return l.GetSessionSeq(in)
 }

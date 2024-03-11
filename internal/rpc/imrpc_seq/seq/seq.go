@@ -13,14 +13,12 @@ import (
 )
 
 type (
-	GetSeqRequest         = pb.GetSeqRequest
-	GetSeqResponse        = pb.GetSeqResponse
-	SetDefaultSeqRequest  = pb.SetDefaultSeqRequest
-	SetDefaultSeqResponse = pb.SetDefaultSeqResponse
+	GetSeqRequest  = pb.GetSeqRequest
+	GetSeqResponse = pb.GetSeqResponse
+	RespBase       = pb.RespBase
 
 	Seq interface {
-		GetSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error)
-		SetDefaultSeq(ctx context.Context, in *SetDefaultSeqRequest, opts ...grpc.CallOption) (*SetDefaultSeqResponse, error)
+		GetSessionSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error)
 	}
 
 	defaultSeq struct {
@@ -34,12 +32,7 @@ func NewSeq(cli zrpc.Client) Seq {
 	}
 }
 
-func (m *defaultSeq) GetSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error) {
+func (m *defaultSeq) GetSessionSeq(ctx context.Context, in *GetSeqRequest, opts ...grpc.CallOption) (*GetSeqResponse, error) {
 	client := pb.NewSeqClient(m.cli.Conn())
-	return client.GetSeq(ctx, in, opts...)
-}
-
-func (m *defaultSeq) SetDefaultSeq(ctx context.Context, in *SetDefaultSeqRequest, opts ...grpc.CallOption) (*SetDefaultSeqResponse, error) {
-	client := pb.NewSeqClient(m.cli.Conn())
-	return client.SetDefaultSeq(ctx, in, opts...)
+	return client.GetSessionSeq(ctx, in, opts...)
 }

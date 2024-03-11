@@ -1,0 +1,34 @@
+syntax =  "proto3";
+package session;
+option go_package = "/pb"
+
+message RespBase{
+    int32 err_code = 1;
+    string err_msg = 2;
+    string err_dlt = 3;
+} 
+
+message InitSessionByUsersResquest{
+    int64 user_id_1 = 1;
+    int64 user_id_2 = 2;
+}
+
+message InitSessionByUsersResponse {
+    int64 session_id = 1;
+}
+
+message InitSessionWithGroupIdRequest {
+    int64 group_id = 1;
+}
+
+message InitSessionWithGroupIdResponse {
+    int64 session_id = 1;
+}
+
+message DelSessionRequest {
+    int64 session_id = 1;
+}
+
+message DelSessionResponse {
+    RespBase base = 1;  
+}
