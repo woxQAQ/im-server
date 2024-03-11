@@ -1,9 +1,6 @@
 package svc
 
 import (
-	"bytes"
-	"sync"
-
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_seq/internal/config"
 	"github.com/woxQAQ/im-service/pkg/common/model"
 	"github.com/woxQAQ/im-service/pkg/common/model/seq"
@@ -16,6 +13,7 @@ import (
 type ServiceContext struct {
 	Config          config.Config
 	SessionSeqModel seq.SessionSequenceModel
+	UserSeqModel    seq.UserSequenceModel
 	Rds             *redis.Redis
 }
 

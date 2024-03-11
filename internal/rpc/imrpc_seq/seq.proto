@@ -20,24 +20,24 @@ enum OperationType {
     OPERATION_TYPE_GID = 2;
 
     // get user id
-    OPERATION_TYPE_GETUID = 3;
+    // OPERATION_TYPE_GETUID = 3;
 
-    // get group id
-    OPERATION_TYPE_GETGID = 4;
+    // // get group id
+    // OPERATION_TYPE_GETGID = 4;
     // todo: more operation...
 }
 
 message GetSeqRequest {
     int64 session_id = 1;
-    OperationType type = 3;
+    OperationType type = 2;
 }
 
 message GetSeqResponse {
     RespBase base = 1;
     int64 cur_seq = 2;
-    int64 user_id = 3;
+    // int64 user_id = 3;
     OperationType type = 4;
-    int64 group_id = 5;
+    // int64 group_id = 5;
     // uint32 max_seq = 3;
 }
 

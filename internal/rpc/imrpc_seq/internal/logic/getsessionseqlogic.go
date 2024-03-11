@@ -129,20 +129,6 @@ func (l *GetSessionSeqLogic) GetSessionSeq(in *pb.GetSeqRequest) (*pb.GetSeqResp
 			},
 			CurSeq: res.CurSeq,
 		}, nil
-	case pb.OperationType_OPERATION_TYPE_GETUID:
-		seqStr, err := l.svcCtx.Rds.Get("UserId")
-		if err != nil {
-			return nil, err
-		}
-
-		if seqStr == "" {
-			// user id 生成器未初始化，或者未加载
-			// 从mysql加载
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			userId, err := l.svcCtx.SessionSeqModel.FindOne(ctx, in.SessionId)
-
-		}
 	default:
 		return &pb.GetSeqResponse{
 			Base: &pb.RespBase{
