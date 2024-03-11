@@ -10,7 +10,7 @@ RUN apt-get update && \
         apt-get upgrade -y && \
         apt-get install -y --no-install-recommends unzip curl zip git vim screen
 
-RUN go get github.com/go-delve/delve/cmd/dlv
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 USER root
 RUN go install github.com/zeromicro/go-zero/tools/goctl@latest

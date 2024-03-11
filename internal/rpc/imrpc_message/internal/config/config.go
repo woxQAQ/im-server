@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
-	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
 )
 
@@ -13,5 +12,7 @@ type Config struct {
 		DataSourceGroup  string
 	}
 	CacheRedis cache.CacheConf
-	Redis redis.RedisConf
+	//Redis redis.RedisConf
+	SeqRpc     zrpc.RpcClientConf
+	SessionRpc zrpc.RpcClientConf
 }

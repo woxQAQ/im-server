@@ -16,7 +16,6 @@ type (
 	MsgData                = pb.MsgData
 	PullMessageWithSeqReq  = pb.PullMessageWithSeqReq
 	PullMessageWithSeqResp = pb.PullMessageWithSeqResp
-	RespData               = pb.RespData
 	ResponseBase           = pb.ResponseBase
 	SendMessageReq         = pb.SendMessageReq
 	SendMessageResp        = pb.SendMessageResp

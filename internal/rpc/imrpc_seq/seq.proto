@@ -22,7 +22,7 @@ enum OperationType {
     // get user id
     // OPERATION_TYPE_GETUID = 3;
 
-    // // get group id
+    // get group id
     // OPERATION_TYPE_GETGID = 4;
     // todo: more operation...
 }

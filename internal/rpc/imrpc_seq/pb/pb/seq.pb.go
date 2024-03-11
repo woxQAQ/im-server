@@ -23,10 +23,10 @@ const (
 type OperationType int32
 
 const (
-	// get session-space sequence id
+	// get Session-space sequence id
 	OperationType_OPERATION_TYPE_SESSION OperationType = 0
-	// get group-session-space sequence id
-	// equals with session
+	// get group-Session-space sequence id
+	// equals with Session
 	OperationType_OPERATION_TYPE_GID OperationType = 2
 )
 

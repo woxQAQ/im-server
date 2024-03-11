@@ -15,5 +15,5 @@ var (
 	ErrWebsockerUpgrade    = errors.New("WebsocketUpgrade")
 	ErrArgumentErr         = errors.New("ArgumentError")
 
-	ErrMqConfigNotFound    = errors.New("MqConfigNotFound")
+	ErrMqConfigNotFound = errors.New("MqConfigNotFound")
 )

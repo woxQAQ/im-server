@@ -11,6 +11,12 @@ enum contentType{
     //    MESSAGE_TYPE_LOCATION = 5;
 }
 
+enum MessageType {
+    MESSAGE_TYPE_SINGLE=0;
+    MESSAGE_TYPE_GROUP=1;
+    MESSAGE_TYPE_UNSPECIFIED = 2;
+}
+
 message ResponseBase {
     int32 err_code = 1;
     string err_msg= 2;
@@ -18,32 +24,27 @@ message ResponseBase {
 }
 
 message MsgData {
-    // 客户端维护的消息id
+//     客户端维护的消息id
     int64 cur_msg_id = 1;
-    // 最后一条发出消息的id，一般为cur_msg_id + 1
+//     最后一条发出消息的id，一般为cur_msg_id + 1
     int64 pre_msg_id = 2;
+//    int64 session_id = 3;
     string content = 4;
-    int64 send_time = 6;
-    contentType content_type = 5;
-}
-
-message RespData{
-    string server_msg_id = 3;
-    string client_msg_id = 4;
-    string send_time = 5;
+    int64 send_time = 5;
+    contentType content_type = 6;
 }
 
 message SendMessageReq{
     string sender_id = 1;
     string receiver_id = 2;
     string group_id = 4;
-    string msg_type = 3;
+    MessageType msg_type = 3;
     MsgData content =5;
 }
 
 message SendMessageResp{
     ResponseBase base = 1;
-    RespData data = 2;
+    int64 cur_msg_id = 2;
 }
 
 message PullMessageWithSeqReq {

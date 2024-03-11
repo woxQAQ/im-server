@@ -1,0 +1,6 @@
+Name: session.rpc
+ListenOn: 0.0.0.0:19002
+Etcd:
+  Hosts:
+  - 172.22.141.30:2379
+  Key: session.rpc

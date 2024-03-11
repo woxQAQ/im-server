@@ -1,8 +1,8 @@
 Name: msg.rpc
-ListenOn: 0.0.0.0:9001
+ListenOn: 0.0.0.0:19001
 Etcd:
   Hosts:
-  - etcd:2379
+  - 172.22.141.30:2379
   Key: msg.rpc
 Mysql:
  DataSourceSingle: root:123456@tcp(mysql:3306)/im_singlechat?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
@@ -11,7 +11,15 @@ CacheRedis:
   - host: redis:6379
     Type: node
     Pass:
-Redis:
-  host: redis:6379
-  Type: node
-  Pass:
+SeqRpc:
+  Etcd:
+    Hosts:
+      - 172.22.141.30:2379
+    Key: seq.rpc
+SessionRpc:
+  Etcd:
+    Hosts:
+      - 172.22.141.30:2379
+    Key: session.rpc
+#Redis:
+#  Host: redis:6379

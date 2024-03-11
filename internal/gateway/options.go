@@ -19,8 +19,6 @@ type configs struct {
 	writeBufSize int
 }
 
-
-
 func WithPort(port int) Option {
 	return func(opt *configs) {
 		opt.port = port
