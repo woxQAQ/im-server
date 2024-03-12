@@ -6,15 +6,10 @@ import (
 	"encoding"
 	"encoding/json"
 	"errors"
-	"strconv"
-	"time"
-
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_seq/internal/svc"
-	"github.com/woxQAQ/im-service/internal/rpc/imrpc_seq/pb/pb"
+	pb "github.com/woxQAQ/im-service/internal/rpc/imrpc_seq/pb"
 	"github.com/woxQAQ/im-service/pkg/common/convert"
-
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/sqlc"
 )
 
 type GetSessionSeqLogic struct {
@@ -72,70 +67,33 @@ func (s *seq) UnmarshalBinary(data []byte) error {
 
 func (l *GetSessionSeqLogic) GetSessionSeq(in *pb.GetSeqRequest) (*pb.GetSeqResponse, error) {
 	// todo: add your logic here and delete this line
+
 	switch in.Type {
 	case pb.OperationType_OPERATION_TYPE_SESSION:
-		var res seq
-		seqStr, err := l.svcCtx.Rds.Hget("SessionSeq", string(rune(in.SessionId)))
+		res, err := l.svcCtx.SessionSeqModel.FindOne(context.Background(), in.SessionId)
 		if err != nil {
 			return nil, err
 		}
-		if seqStr == "" {
-			// redis 中不存在对应 session id 的键值对，查库
-			// seqid 是需要入库的
-			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-			defer cancel()
-			sessionSeq, err := l.svcCtx.SessionSeqModel.FindOne(ctx, in.SessionId)
-
-			if err == sqlc.ErrNotFound {
-				// mysql 中也没有对应的session id的 seqid
-				res.CurSeq = 1
-				res.MaxSeq = int64(l.svcCtx.Config.Seq.Step)
-				resBuf, err := res.MarshalBinary()
-				if err != nil {
-					return nil, err
-				}
-
-				l.svcCtx.Rds.Hset("SessionSeq", strconv.FormatInt(in.SessionId, 10), string(resBuf))
-			} else {
-				// 存在记录，将 MaxSeq写入Curseq
-				res.CurSeq = sessionSeq.MaxSeq + 1
-				res.MaxSeq = sessionSeq.MaxSeq + int64(l.svcCtx.Config.Seq.Step)
-				resBuf, err := res.MarshalBinary()
-				if err != nil {
-					return nil, err
-				}
-
-				l.svcCtx.Rds.Hset("SessionSeq", strconv.FormatInt(in.SessionId, 10), string(resBuf))
-			}
-
-			return &pb.GetSeqResponse{
-				Base: &pb.RespBase{
-					ErrCode: 0,
-				},
-				CurSeq: res.CurSeq,
-			}, nil
-		}
-
-		res.UnmarshalBinary([]byte(seqStr))
-		if res.CurSeq+1 == res.MaxSeq {
-			res.CurSeq += 1
-			res.MaxSeq += int64(l.svcCtx.Config.Seq.Step)
-		}
-		writeback, _ := res.MarshalBinary()
-		l.svcCtx.Rds.Hset("SessionSeq", strconv.FormatInt(in.SessionId, 10), string(writeback))
 		return &pb.GetSeqResponse{
 			Base: &pb.RespBase{
 				ErrCode: 0,
 			},
 			CurSeq: res.CurSeq,
+			MaxSeq: res.MaxSeq,
 		}, nil
-	default:
+	case pb.OperationType_OPERATION_TYPE_GROUP:
+		res, err := l.svcCtx.GroupSequenceModel.FindOne(context.Background(), in.GroupId)
+		if err != nil {
+			return nil, err
+		}
 		return &pb.GetSeqResponse{
 			Base: &pb.RespBase{
-				ErrCode: 11,
-				ErrMsg:  "your session type field is error",
+				ErrCode: 0,
 			},
-		}, errors.New("UnKnownSessionType")
+			CurSeq: res.CurSeq,
+			MaxSeq: res.MaxSeq,
+		}, nil
+	default:
+		return nil, nil
 	}
-
 }

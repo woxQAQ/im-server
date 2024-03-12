@@ -18,18 +18,18 @@ import (
 var (
 	userSequenceFieldNames          = builder.RawFieldNames(&UserSequence{})
 	userSequenceRows                = strings.Join(userSequenceFieldNames, ",")
-	userSequenceRowsExpectAutoSet   = strings.Join(stringx.Remove(userSequenceFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	userSequenceRowsWithPlaceHolder = strings.Join(stringx.Remove(userSequenceFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	userSequenceRowsExpectAutoSet   = strings.Join(stringx.Remove(userSequenceFieldNames, "`user_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	userSequenceRowsWithPlaceHolder = strings.Join(stringx.Remove(userSequenceFieldNames, "`user_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
-	cacheUserSequenceIdPrefix = "cache:userSequence:id:"
+	cacheUserSequenceUserIdPrefix = "cache:userSequence:userId:"
 )
 
 type (
 	userSequenceModel interface {
 		Insert(ctx context.Context, data *UserSequence) (sql.Result, error)
-		FindOne(ctx context.Context, id int64) (*UserSequence, error)
+		FindOne(ctx context.Context, userId int64) (*UserSequence, error)
 		Update(ctx context.Context, data *UserSequence) error
-		Delete(ctx context.Context, id int64) error
+		Delete(ctx context.Context, userId int64) error
 	}
 
 	defaultUserSequenceModel struct {
@@ -38,7 +38,7 @@ type (
 	}
 
 	UserSequence struct {
-		Id     int64 `db:"id"`
+		UserId int64 `db:"user_id"`
 		CurSeq int64 `db:"cur_seq"`
 		MaxSeq int64 `db:"max_seq"`
 	}
@@ -51,21 +51,21 @@ func newUserSequenceModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache.Op
 	}
 }
 
-func (m *defaultUserSequenceModel) Delete(ctx context.Context, id int64) error {
-	userSequenceIdKey := fmt.Sprintf("%s%v", cacheUserSequenceIdPrefix, id)
+func (m *defaultUserSequenceModel) Delete(ctx context.Context, userId int64) error {
+	userSequenceUserIdKey := fmt.Sprintf("%s%v", cacheUserSequenceUserIdPrefix, userId)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
-		return conn.ExecCtx(ctx, query, id)
-	}, userSequenceIdKey)
+		query := fmt.Sprintf("delete from %s where `user_id` = ?", m.table)
+		return conn.ExecCtx(ctx, query, userId)
+	}, userSequenceUserIdKey)
 	return err
 }
 
-func (m *defaultUserSequenceModel) FindOne(ctx context.Context, id int64) (*UserSequence, error) {
-	userSequenceIdKey := fmt.Sprintf("%s%v", cacheUserSequenceIdPrefix, id)
+func (m *defaultUserSequenceModel) FindOne(ctx context.Context, userId int64) (*UserSequence, error) {
+	userSequenceUserIdKey := fmt.Sprintf("%s%v", cacheUserSequenceUserIdPrefix, userId)
 	var resp UserSequence
-	err := m.QueryRowCtx(ctx, &resp, userSequenceIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
-		query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", userSequenceRows, m.table)
-		return conn.QueryRowCtx(ctx, v, query, id)
+	err := m.QueryRowCtx(ctx, &resp, userSequenceUserIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", userSequenceRows, m.table)
+		return conn.QueryRowCtx(ctx, v, query, userId)
 	})
 	switch err {
 	case nil:
@@ -78,29 +78,29 @@ func (m *defaultUserSequenceModel) FindOne(ctx context.Context, id int64) (*User
 }
 
 func (m *defaultUserSequenceModel) Insert(ctx context.Context, data *UserSequence) (sql.Result, error) {
-	userSequenceIdKey := fmt.Sprintf("%s%v", cacheUserSequenceIdPrefix, data.Id)
+	userSequenceUserIdKey := fmt.Sprintf("%s%v", cacheUserSequenceUserIdPrefix, data.UserId)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
 		query := fmt.Sprintf("insert into %s (%s) values (?, ?)", m.table, userSequenceRowsExpectAutoSet)
 		return conn.ExecCtx(ctx, query, data.CurSeq, data.MaxSeq)
-	}, userSequenceIdKey)
+	}, userSequenceUserIdKey)
 	return ret, err
 }
 
 func (m *defaultUserSequenceModel) Update(ctx context.Context, data *UserSequence) error {
-	userSequenceIdKey := fmt.Sprintf("%s%v", cacheUserSequenceIdPrefix, data.Id)
+	userSequenceUserIdKey := fmt.Sprintf("%s%v", cacheUserSequenceUserIdPrefix, data.UserId)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, userSequenceRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.CurSeq, data.MaxSeq, data.Id)
-	}, userSequenceIdKey)
+		query := fmt.Sprintf("update %s set %s where `user_id` = ?", m.table, userSequenceRowsWithPlaceHolder)
+		return conn.ExecCtx(ctx, query, data.CurSeq, data.MaxSeq, data.UserId)
+	}, userSequenceUserIdKey)
 	return err
 }
 
 func (m *defaultUserSequenceModel) formatPrimary(primary any) string {
-	return fmt.Sprintf("%s%v", cacheUserSequenceIdPrefix, primary)
+	return fmt.Sprintf("%s%v", cacheUserSequenceUserIdPrefix, primary)
 }
 
 func (m *defaultUserSequenceModel) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", userSequenceRows, m.table)
+	query := fmt.Sprintf("select %s from %s where `user_id` = ? limit 1", userSequenceRows, m.table)
 	return conn.QueryRowCtx(ctx, v, query, primary)
 }
 

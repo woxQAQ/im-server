@@ -2,9 +2,11 @@ package logic
 
 import (
 	"context"
+	"fmt"
 	"github.com/pkg/errors"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/internal/svc"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_message/pb"
+	pb2 "github.com/woxQAQ/im-service/internal/rpc/imrpc_seq/pb"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -30,13 +32,65 @@ func (l *SendMsgLogic) SendMsg(in *pb.SendMessageReq) (*pb.SendMessageResp, erro
 	// todo: add your logic here and delete this line
 	//1. 根据会话id获取 preid
 	var (
-		resp      pb.SendMessageResp
-		sessionId = in.SenderId + ":" + in.ReceiverId
+		resp pb.SendMessageResp
 	)
-	storedPid, ok := l.svcCtx.PreMap[sessionId]
-	// map 内不存在，则直接赋值
+
+	sessionId := svc.Session{
+		Sender:   in.SenderId,
+		Receiver: in.ReceiverId,
+	}
+
+	// 确保session不存在
+
+	storedPid, ok := l.svcCtx.SinglePreMap[sessionId]
 	if !ok {
-		l.svcCtx.PreMap[sessionId] = in.Content.PreMsgId
+		// map 内不存在
+		// 可能存在以下几种情况：
+		// 会话刚刚初始化，此时 preid = 0
+		// 服务器重启丢失数据，从数据库中获取最新一条消息的 preid
+		if in.Content.PreMsgId == 0 {
+			// 会话初始化
+			// 直接赋值
+			l.svcCtx.SinglePreMap[sessionId] = 0
+			resp.Base.ErrCode = 0
+			resp.CurMsgId = 1
+			seq, err := l.svcCtx.SeqServer.GetSessionSeq(context.Background(), &pb2.GetSeqRequest{
+				Type: func(messageType pb.MessageType) pb2.OperationType {
+					switch messageType {
+					case pb.MessageType_MESSAGE_TYPE_SINGLE:
+						return pb2.OperationType_OPERATION_TYPE_SESSION
+					case pb.MessageType_MESSAGE_TYPE_GROUP:
+						return pb2.OperationType_OPERATION_TYPE_GID
+					default:
+						return -1
+					}
+				}(in.MsgType),
+				UserId_1: in.SenderId,
+				UserId_2: in.ReceiverId,
+				GroupId:  in.GroupId,
+			})
+
+			if err != nil {
+				return nil, err
+			}
+			return &resp, nil
+		} else {
+			presistPid, err := l.svcCtx.SenderDtl.FindBySenderAndSession(l.ctx, in.SenderId, sessionId)
+			if err != nil {
+				resp.Base.ErrCode = 11
+				resp.Base.ErrMsg = err.Error()
+				return &resp, nil
+			}
+
+			if presistPid != in.Content.PreMsgId {
+				// preid 不一致，返回错误
+				resp.Base.ErrCode = 1011
+				err = errors.New(fmt.Sprintf("Your preid %v is error, expected preid is contained in this message", in.Content.PreMsgId))
+				resp.Base.ErrMsg = err.Error()
+				resp.CurMsgId = presistPid
+				return &resp, nil
+			}
+		}
 	}
 
 	// 校验preid
@@ -62,6 +116,7 @@ func (l *SendMsgLogic) SendMsg(in *pb.SendMessageReq) (*pb.SendMessageResp, erro
 		//  用户是否使用一个全局的序列号？使用，但是不在发送阶段使用，而是接收阶段
 
 		// todo 为消息分配一个msg_id
+		l.svcCtx.SeqServer.GetSessionSeq(context.Background(), &pb2.GetSeqRequest{})
 		resp = pb.SendMessageResp{
 			Base: &pb.ResponseBase{
 				ErrCode: 0,

@@ -18,18 +18,18 @@ import (
 var (
 	sessionSequenceFieldNames          = builder.RawFieldNames(&SessionSequence{})
 	sessionSequenceRows                = strings.Join(sessionSequenceFieldNames, ",")
-	sessionSequenceRowsExpectAutoSet   = strings.Join(stringx.Remove(sessionSequenceFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
-	sessionSequenceRowsWithPlaceHolder = strings.Join(stringx.Remove(sessionSequenceFieldNames, "`id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
+	sessionSequenceRowsExpectAutoSet   = strings.Join(stringx.Remove(sessionSequenceFieldNames, "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), ",")
+	sessionSequenceRowsWithPlaceHolder = strings.Join(stringx.Remove(sessionSequenceFieldNames, "`session_id`", "`create_at`", "`create_time`", "`created_at`", "`update_at`", "`update_time`", "`updated_at`"), "=?,") + "=?"
 
-	cacheSessionSequenceIdPrefix = "cache:sessionSequence:id:"
+	cacheSessionSequenceSessionIdPrefix = "cache:sessionSequence:sessionId:"
 )
 
 type (
 	sessionSequenceModel interface {
 		Insert(ctx context.Context, data *SessionSequence) (sql.Result, error)
-		FindOne(ctx context.Context, id int64) (*SessionSequence, error)
+		FindOne(ctx context.Context, sessionId int64) (*SessionSequence, error)
 		Update(ctx context.Context, data *SessionSequence) error
-		Delete(ctx context.Context, id int64) error
+		Delete(ctx context.Context, sessionId int64) error
 	}
 
 	defaultSessionSequenceModel struct {
@@ -38,9 +38,9 @@ type (
 	}
 
 	SessionSequence struct {
-		Id        int64 `db:"id"`
 		SessionId int64 `db:"session_id"`
 		MaxSeq    int64 `db:"max_seq"`
+		CurSeq    int64 `db:"cur_seq"`
 	}
 )
 
@@ -51,21 +51,21 @@ func newSessionSequenceModel(conn sqlx.SqlConn, c cache.CacheConf, opts ...cache
 	}
 }
 
-func (m *defaultSessionSequenceModel) Delete(ctx context.Context, id int64) error {
-	sessionSequenceIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceIdPrefix, id)
+func (m *defaultSessionSequenceModel) Delete(ctx context.Context, sessionId int64) error {
+	sessionSequenceSessionIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceSessionIdPrefix, sessionId)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("delete from %s where `id` = ?", m.table)
-		return conn.ExecCtx(ctx, query, id)
-	}, sessionSequenceIdKey)
+		query := fmt.Sprintf("delete from %s where `session_id` = ?", m.table)
+		return conn.ExecCtx(ctx, query, sessionId)
+	}, sessionSequenceSessionIdKey)
 	return err
 }
 
-func (m *defaultSessionSequenceModel) FindOne(ctx context.Context, id int64) (*SessionSequence, error) {
-	sessionSequenceIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceIdPrefix, id)
+func (m *defaultSessionSequenceModel) FindOne(ctx context.Context, sessionId int64) (*SessionSequence, error) {
+	sessionSequenceSessionIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceSessionIdPrefix, sessionId)
 	var resp SessionSequence
-	err := m.QueryRowCtx(ctx, &resp, sessionSequenceIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
-		query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", sessionSequenceRows, m.table)
-		return conn.QueryRowCtx(ctx, v, query, id)
+	err := m.QueryRowCtx(ctx, &resp, sessionSequenceSessionIdKey, func(ctx context.Context, conn sqlx.SqlConn, v any) error {
+		query := fmt.Sprintf("select %s from %s where `session_id` = ? limit 1", sessionSequenceRows, m.table)
+		return conn.QueryRowCtx(ctx, v, query, sessionId)
 	})
 	switch err {
 	case nil:
@@ -78,29 +78,29 @@ func (m *defaultSessionSequenceModel) FindOne(ctx context.Context, id int64) (*S
 }
 
 func (m *defaultSessionSequenceModel) Insert(ctx context.Context, data *SessionSequence) (sql.Result, error) {
-	sessionSequenceIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceIdPrefix, data.Id)
+	sessionSequenceSessionIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceSessionIdPrefix, data.SessionId)
 	ret, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("insert into %s (%s) values (?, ?)", m.table, sessionSequenceRowsExpectAutoSet)
-		return conn.ExecCtx(ctx, query, data.SessionId, data.MaxSeq)
-	}, sessionSequenceIdKey)
+		query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?)", m.table, sessionSequenceRowsExpectAutoSet)
+		return conn.ExecCtx(ctx, query, data.SessionId, data.MaxSeq, data.CurSeq)
+	}, sessionSequenceSessionIdKey)
 	return ret, err
 }
 
 func (m *defaultSessionSequenceModel) Update(ctx context.Context, data *SessionSequence) error {
-	sessionSequenceIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceIdPrefix, data.Id)
+	sessionSequenceSessionIdKey := fmt.Sprintf("%s%v", cacheSessionSequenceSessionIdPrefix, data.SessionId)
 	_, err := m.ExecCtx(ctx, func(ctx context.Context, conn sqlx.SqlConn) (result sql.Result, err error) {
-		query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, sessionSequenceRowsWithPlaceHolder)
-		return conn.ExecCtx(ctx, query, data.SessionId, data.MaxSeq, data.Id)
-	}, sessionSequenceIdKey)
+		query := fmt.Sprintf("update %s set %s where `session_id` = ?", m.table, sessionSequenceRowsWithPlaceHolder)
+		return conn.ExecCtx(ctx, query, data.MaxSeq, data.CurSeq, data.SessionId)
+	}, sessionSequenceSessionIdKey)
 	return err
 }
 
 func (m *defaultSessionSequenceModel) formatPrimary(primary any) string {
-	return fmt.Sprintf("%s%v", cacheSessionSequenceIdPrefix, primary)
+	return fmt.Sprintf("%s%v", cacheSessionSequenceSessionIdPrefix, primary)
 }
 
 func (m *defaultSessionSequenceModel) queryPrimary(ctx context.Context, conn sqlx.SqlConn, v, primary any) error {
-	query := fmt.Sprintf("select %s from %s where `id` = ? limit 1", sessionSequenceRows, m.table)
+	query := fmt.Sprintf("select %s from %s where `session_id` = ? limit 1", sessionSequenceRows, m.table)
 	return conn.QueryRowCtx(ctx, v, query, primary)
 }
 

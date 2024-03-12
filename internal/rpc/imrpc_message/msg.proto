@@ -35,10 +35,10 @@ message MsgData {
 }
 
 message SendMessageReq{
-    string sender_id = 1;
-    string receiver_id = 2;
-    string group_id = 4;
-    MessageType msg_type = 3;
+    int64 sender_id = 1;
+    int64 receiver_id = 2;
+    int64 group_id = 3;
+    MessageType msg_type = 4;
     MsgData content =5;
 }
 

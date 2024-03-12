@@ -10,9 +10,9 @@ type Config struct {
 	Mysql struct {
 		DataSourceSingle string
 		DataSourceGroup  string
+		DataSourceSender string
 	}
 	CacheRedis cache.CacheConf
 	//Redis redis.RedisConf
-	SeqRpc     zrpc.RpcClientConf
-	SessionRpc zrpc.RpcClientConf
+	SeqRpc zrpc.RpcClientConf
 }
