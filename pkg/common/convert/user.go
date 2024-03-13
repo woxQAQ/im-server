@@ -1,8 +1,8 @@
 package convert
 
 import (
+	"github.com/woxQAQ/im-service/internal/app/user/model"
 	"github.com/woxQAQ/im-service/internal/rpc/imrpc_user/pb"
-	"github.com/woxQAQ/im-service/pkg/common/model/user"
 )
 
 func StrToGender(gender string) (pb.Gender, error) {
@@ -14,5 +14,5 @@ func StrToGender(gender string) (pb.Gender, error) {
 	case "female":
 		return pb.Gender_GENDER_FEMALE, nil
 	}
-	return -1, user.ErrGenderInvalid
+	return -1, model.ErrGenderInvalid
 }

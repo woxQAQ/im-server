@@ -46,12 +46,12 @@ func (u *UserMap) Get(userId string, platformId int) ([]*Client, bool, bool) {
 func (u *UserMap) Set(userId string, client *Client) {
 	allClients, userExited := u.m.Load(userId)
 	if userExited {
-		zap.S().Debug(context.Background(), "user exited", "userid", userId, "client", client)
+		zap.S().Debug(context.Background(), "rpc exited", "userid", userId, "client", client)
 		oldClients := allClients.([]*Client)
 		oldClients = append(oldClients, client)
 		u.m.Store(userId, oldClients)
 	} else {
-		zap.S().Debug(context.Background(), " user not exited, ", "userid: ", userId, " client ", client)
+		zap.S().Debug(context.Background(), " rpc not exited, ", "userid: ", userId, " client ", client)
 		var clients []*Client
 		clients = append(clients, client)
 		u.m.Store(userId, clients)

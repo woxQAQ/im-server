@@ -31,13 +31,13 @@ type Client struct {
 	// ClientId is the Identify of a Client
 	ClientId string
 
-	// UserId is the Id of the user of Client
+	// UserId is the Id of the rpc of Client
 	// UserId is different from ClientId
-	// UserId identify a real user of the Im service
+	// UserId identify a real rpc of the Im service
 	// ClientId, on the other hand, can be called "sessionId"
 	UserId string
 
-	// PlatformId is the system of the user
+	// PlatformId is the system of the rpc
 	PlatformId int
 
 	// MessageChan is used to send message to the ClientManager
@@ -49,7 +49,7 @@ type Client struct {
 	// CloseErr is the error why the client close
 	CloseErr error
 
-	// token is the token of the user
+	// token is the token of the rpc
 	token string
 
 	ConnectTime uint64

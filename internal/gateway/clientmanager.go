@@ -34,7 +34,7 @@ type ClientMgr struct {
 
 	// onlineUserConnNum is the number of connection of server
 	// NOTE: onlineNum different from onlineNum because
-	// one user may login several terminal at a same time
+	// one rpc may login several terminal at a same time
 	// different terminal should be handlerred as different clients
 	onlineUserConnNum atomic.Int64
 }
@@ -78,7 +78,7 @@ func (m *ClientMgr) Run(done chan struct{}) error {
 func (m *ClientMgr) RegisterClient(client *Client) {
 	_, userOk, clientOk := m.ClientMap.Get(client.UserId, client.PlatformId)
 	// There is No key "user_id" in the ClientMap.
-	// It indicates that the user is login to the server for the first time
+	// It indicates that the rpc is login to the server for the first time
 	if !userOk {
 		m.ClientMap.Set(client.UserId, client)
 		m.onlineNum.Add(1)
@@ -96,10 +96,10 @@ func (m *ClientMgr) RegisterClient(client *Client) {
 		}
 	}
 
-	zap.S().Info("user: ", client.UserId,
-		" arrived\nonline user number: ",
+	zap.S().Info("rpc: ", client.UserId,
+		" arrived\nonline rpc number: ",
 		m.onlineNum.Load(),
-		"\nonline user conn number: ",
+		"\nonline rpc conn number: ",
 		m.onlineUserConnNum.Load(),
 	)
 }
@@ -110,5 +110,5 @@ func (m *ClientMgr) unregisterClient(client *Client) {
 		m.onlineNum.Add(-1)
 	}
 	m.onlineUserConnNum.Add(-1)
-	zap.S().Info("user offline! ", "close Error:", client.CloseErr)
+	zap.S().Info("rpc offline! ", "close Error:", client.CloseErr)
 }

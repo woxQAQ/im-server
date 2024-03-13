@@ -1,0 +1,99 @@
+syntax = "proto3";
+package seq;
+option go_package = "/pb";
+
+message RespBase{
+    int32 err_code = 1;
+    string err_msg = 2;
+    string err_dlt = 3;
+}
+
+enum OperationType {
+    // get session-space sequence id
+    OPERATION_TYPE_SESSION = 0;
+
+    // get user-space sequence id
+    // OPERATION_TYPE_UID = 1;
+
+    // get group-session-space sequence id
+    // equals with session 
+    OPERATION_TYPE_GROUP = 1;
+
+    // get user id
+    // OPERATION_TYPE_GETUID = 3;
+
+    // get group id
+    // OPERATION_TYPE_GETGID = 4;
+    // todo: more operation...
+}
+
+message GetSessionIdRequest {
+    int64 user_id_1 = 1;
+    int64 user_id_2 = 2;
+}
+
+message GetSeqRequest {
+    int64 session_id = 1;
+    int64 group_id = 3;
+    OperationType type = 4;
+}
+
+message GetMessageIdsRequest {
+    int64 session_id = 1;
+    int64 group_id = 2;
+    int64 begin_seq = 3;
+    int64 end_seq = 4;
+}
+
+message UpdateSessionSeqRequest {
+    int64 session_id = 1;
+    int64 group_id = 2;
+    int64 step = 3;
+}
+
+message GetSessionIdResponse {
+    RespBase base = 1;
+    int64 session_id = 2;
+}
+
+message GetSeqResponse {
+    RespBase base = 1;
+    int64 max_seq = 2;
+    // int64 user_id = 3;
+//    OperationType type = 4;
+    // int64 group_id = 5;
+//     int64 max_seq = 3;
+}
+
+message GetMessageIdsResponse {
+    repeated int64 message_id = 1;
+    RespBase base = 2;
+}
+
+message UpdateSessionSeqResponse {
+    RespBase base = 1;
+    int64 new_max_seq = 2;
+}
+
+// message SetDefaultSeqRequest {
+//     string user_id = 1;
+// }
+
+// message SetDefaultSeqResponse {
+//     string cur_seq = 1;
+//     int32 err_code = 2;
+//     string err_msg = 3;
+//     string err_dlt = 4;
+// }
+
+
+service Seq {
+    rpc GetSessionId(GetSessionIdRequest) returns (GetSessionIdResponse);
+
+    rpc GetMessageIds(GetMessageIdsRequest) returns (GetMessageIdsResponse);
+
+    rpc GetSessionSeq(GetSeqRequest) returns (GetSeqResponse);
+
+    rpc UpdateSessionSeq(UpdateSessionSeqRequest) returns (UpdateSessionSeqResponse);
+    // rpc SetDefaultSeq(SetDefaultSeqRequest) returns (SetDefaultSeqResponse);
+}

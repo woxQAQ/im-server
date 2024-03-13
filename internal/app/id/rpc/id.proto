@@ -1,0 +1,32 @@
+syntax = "proto3";
+package id;
+
+option go_package = "/pb";
+
+message RespBase {
+    int32 err_code = 1;
+    string err_msg = 2;
+    string err_dtl = 3;
+}
+
+enum RequestCaller {
+    REQUEST_CALLER_USER = 0;
+    REQUEST_CALLER_GROUP = 1;
+    // todo: 更多调用者，如公号，管理员。。。
+}
+
+message GetSeqReq {
+    int64 user_id = 1;
+    int64 group_id = 2;
+    RequestCaller caller_type = 3;
+}
+
+message GetSeqResp {
+    int64 id = 1;
+    int64 cur_seq= 2;
+    int64 max_seq = 3;
+}
+
+service Id {
+    rpc GetSeq(GetSeqReq) returns (GetSeqResp);
+}

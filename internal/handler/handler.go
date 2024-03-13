@@ -26,13 +26,13 @@ var (
 
 type Handler struct {
 	// // GroupMsgControl is used to manage GroupMsg database
-	// GroupMsgControl group.GroupMsgModel
+	// GroupMsgControl model.GroupMsgModel
 
 	// // SingleMsgControl is used to manage SingleMsg database
 	// SingleMsgControl single.SingleMessageModel
 
 	// // GroupUserControl is used to manage GroupUserControl database
-	// GroupUserControl group.GroupUsersModel
+	// GroupUserControl model.GroupUsersModel
 
 	// RpcHandler is used to handler im message, and call rpc
 	*mqConnector

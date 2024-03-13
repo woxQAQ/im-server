@@ -1,0 +1,49 @@
+Name: Seq.rpc
+ListenOn: 0.0.0.0:1001
+Mode: dev
+
+Log:
+  ServiceName: seq.rpc
+  Level: error
+
+Prometheus:
+  Host: 0.0.0.0
+  Port: 4001
+  Path: /metrics
+
+Telemetry:
+  Name: seq.rpc
+  Endpoint: http://jaeger:5000/api/trace
+  Sampler: 1.0
+  Batcher: jaeger
+
+Etcd:
+  Hosts:
+  - etcd:2379
+  Key: Seq.rpc
+
+Seq:
+  Step: 100
+  DefaultMaxSeq: 0
+
+Mysql:
+  DataSource: root:123456@tcp(mysql:3306)/im_seq?charset=utf8mb4&parseTime=True&loc=Asia%2FShanghai
+
+Redis:
+  Host: redis:6379
+  Type: node
+  Pass:
+  Key: seq-rpc
+
+Rmq:
+  Config:
+    Endpoint: 172.22.141.30:8081
+    Credenticals:
+      AccessKey:
+      AccessSecret:
+
+Topic:
+
+CacheRedis:
+  Host: redis:6379
+  Type:
